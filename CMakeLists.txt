@@ -57,6 +57,7 @@ set(SCRIPT_FILES
   init_vis.mac
   singleBeam.mac
   extendedSource.mac
+  Trento.mac
 )
 
 set(PARAMETERS_FILES

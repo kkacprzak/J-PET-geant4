@@ -37,6 +37,7 @@
 #include <G4Box.hh>
 #include <string>
 
+//#include "G4GDMLParser.hh"
 class DetectorConstructionMessenger;
 
 //! Flag for debugging purposes
@@ -112,6 +113,7 @@ private:
   G4LogicalVolume* fWorldLogical;
   G4VPhysicalVolume* fWorldPhysical;
 
+
   MaterialExtension* fAir;
   MaterialExtension* fKapton;
   MaterialExtension* fVacuum;
@@ -125,6 +127,12 @@ private:
   G4LogicalVolume* fScinLog;
   G4LogicalVolume* fScinLogInModule;
   G4Cache<DetectorSD*> fDetectorSD;
+
+//GDML output
+    
+  //  G4String fWriteFile;
+  //  G4GDMLParser* fParser;
+
 };
 
 #endif
