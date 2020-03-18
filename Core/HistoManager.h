@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -83,6 +83,8 @@ public:
 
   void FillHistoGenInfo(const G4Event* anEvent);
 
+  void FillCosmicInfo(G4double theta, G4ThreeVector init, G4ThreeVector vtx);
+
   const JPetGeantEventInformation* GetGeantInfo()
   {
     return fGeantInfo;
@@ -100,7 +102,6 @@ private:
    * 4 - lifetime
    * 5 - prompt lifetime
    */
-
   TH1F* fHisto[MaxHisto];
 
   /**
@@ -114,6 +115,10 @@ private:
   * 6 -YZ prompt
   */
   TH2F* fHisto2D[MaxHisto2D];
+
+  // cosmic generator histograms
+  TH1F *h_theta;
+  TH2F *h_init_xy, *h_init_xz, *h_init_yz, *h_orig_xy, *h_orig_xz, *h_orig_yz;
 
   TFile* fRootFile;
   TTree* fTree;

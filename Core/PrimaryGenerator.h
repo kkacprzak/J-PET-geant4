@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -24,8 +24,11 @@
 #include <TLorentzVector.h>
 #include "SourceParams.h"
 #include <G4Navigator.hh>
+#include "HistoManager.h"
 #include "BeamParams.h"
 #include <G4Event.hh>
+#include <TH1F.h>
+#include <TH2F.h>
 
 class PrimaryGenerator : public G4VPrimaryGenerator
 {
@@ -37,6 +40,7 @@ public:
   void GenerateNema(G4int, G4Event*);
   void GenerateEvtSmallChamber(G4Event* event, const G4double);
   void GenerateEvtLargeChamber(G4Event* event);
+  void GenerateCosmicVertex(G4Event* event, HistoManager* histos);
   virtual void GeneratePrimaryVertex(G4Event*) {};
 
 private:
@@ -50,9 +54,10 @@ private:
   G4PrimaryVertex* GeneratePromptGammaVertex(const G4ThreeVector vtxPosition, const G4double T0, const G4double lifetimePrompt, const G4double energy);
   G4ThreeVector VertexUniformInCylinder(G4double, G4double);
   G4double calculate_mQED(Double_t mass_e, Double_t w1, Double_t w2, Double_t w3);
-  const G4ThreeVector  GetRandomPointInFilledSphere(G4double radius);
-  const G4ThreeVector  GetRandomPointOnSphere(G4double radius);
-  G4Navigator* theNavigator =  G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
+  const G4ThreeVector GetRandomPointInFilledSphere(G4double radius);
+  const G4ThreeVector GetRandomPointOnSphere(G4double radius);
+  G4Navigator* theNavigator = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
+
 };
 
 #endif

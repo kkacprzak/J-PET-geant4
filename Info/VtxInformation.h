@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -43,6 +43,11 @@ public:
     fPromptGammaGen = tf;
   };
 
+  void SetCosmicGen(G4bool isCosmic)
+  {
+    fCosmicGen = isCosmic;
+  };
+
   void SetRunNr(G4int x)
   {
     fnRun = x;
@@ -68,6 +73,11 @@ public:
   G4bool GetPromptGammaGen()
   {
     return fPromptGammaGen;
+  };
+
+  G4bool GetCosmicGammaGen()
+  {
+    return fCosmicGen;
   };
 
   G4int  GetRunNr()
@@ -100,6 +110,7 @@ private:
   G4bool fTwoGammaGen;
   G4bool fThreeGammaGen;
   G4bool fPromptGammaGen;
+  G4bool fCosmicGen;
   G4int fnRun;
   G4double fLifetime;
 

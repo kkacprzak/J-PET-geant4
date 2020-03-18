@@ -54,6 +54,7 @@ set(SCRIPT_FILES
   run6.mac
   run7.mac
   nema.mac
+  cosmics.mac
   init_vis.mac
   singleBeam.mac
   extendedSource.mac
@@ -199,4 +200,3 @@ add_custom_command(
   ${CMAKE_CURRENT_SOURCE_DIR}/docs/manual_v3.0.pdf
   ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
-

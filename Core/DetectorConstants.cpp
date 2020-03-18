@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -26,6 +26,7 @@ const G4double DetectorConstants::wrappingThickness = 2 * 25.4 * pow(10, -6) * m
 const G4double DetectorConstants::wrappingShift = 1 * pow(10, -5) * m;
 G4double DetectorConstants::fScinHitMergingTime = 5.0 * ns;
 G4double DetectorConstants::fChamberCenter[3] = {0.0 * cm, 0.0 * cm, 0.0 * cm};
+const G4double DetectorConstants::muonChargeRatio = 1.2766;
 
 void DetectorConstants::SetChamberCenter(const G4ThreeVector xyz)
 {

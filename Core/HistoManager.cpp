@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -14,6 +14,7 @@
  */
 
 #include "../Info/PrimaryParticleInformation.h"
+#include "DetectorConstants.h"
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
 #include "HistoManager.h"
@@ -85,12 +86,6 @@ void HistoManager::BookHistograms()
   fHisto[3]->GetXaxis()->SetTitle("Hit-position along z [cm]");
   fHisto[3]->GetYaxis()->SetTitle("Entries");
 
-  fHisto2D[0] = new TH2F(
-    "gen_hits_xy_pos", "GEN hits XY pos", 121, -60.5, 60.5, 121, -60.5, 60.5
-  );
-  fHisto2D[0]->GetXaxis()->SetTitle("Hit-position X [cm]");
-  fHisto2D[0]->GetYaxis()->SetTitle("Hit-position Y [cm]");
-
   fHisto[4] = new TH1F("gen_lifetime", "Gen lifetime", 100, 0.0, 1500.0);
   fHisto[4]->GetXaxis()->SetTitle("Lifetime (2/3g) [ps]");
   fHisto[4]->GetYaxis()->SetTitle("Entries");
@@ -98,6 +93,16 @@ void HistoManager::BookHistograms()
   fHisto[5] = new TH1F("gen_prompt_lifetime", "Gen prompt lifetime", 100, 0.0, 1500.0);
   fHisto[5]->GetXaxis()->SetTitle("Lifetime prompt gamma [ps]");
   fHisto[5]->GetYaxis()->SetTitle("Entries");
+
+  fHisto[6] = new TH1F("gen_g_ene", "Gen energy", 200, 0.0, 1500.0);
+  fHisto[6]->GetXaxis()->SetTitle("E_1 gen [keV]");
+  fHisto[6]->GetYaxis()->SetTitle("Entries");
+
+  fHisto2D[0] = new TH2F(
+    "gen_hits_xy_pos", "GEN hits XY pos", 121, -60.5, 60.5, 121, -60.5, 60.5
+  );
+  fHisto2D[0]->GetXaxis()->SetTitle("Hit-position X [cm]");
+  fHisto2D[0]->GetYaxis()->SetTitle("Hit-position Y [cm]");
 
   fHisto2D[1] = new TH2F(
     "gen_XY", "GEN XY coordinates of annihilation point",
@@ -153,9 +158,60 @@ void HistoManager::BookHistograms()
   fHisto2D[8]->GetXaxis()->SetTitle("E_{1} [keV]");
   fHisto2D[8]->GetYaxis()->SetTitle("E_{2} [keV]");
 
-  fHisto[6] = new TH1F("gen_g_ene", "Gen energy", 200, 0.0, 1500.0);
-  fHisto[6]->GetXaxis()->SetTitle("E_1 gen [keV]");
-  fHisto[6]->GetYaxis()->SetTitle("Entries");
+  h_theta = new TH1F(
+    "cosm_theta", "Cosmmic gen: theta angle",
+    181, -CLHEP::twopi/4, CLHEP::twopi/4
+  );
+  h_theta->GetXaxis()->SetTitle("theta [rad]");
+  h_theta->GetYaxis()->SetTitle("number of entries");
+
+  h_init_xy = new TH2F(
+    "coms_init_xy", "Cosmic gen: generated initial point XY",
+    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
+    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
+  );
+  h_init_xy->GetXaxis()->SetTitle("Y position [mm]");
+  h_init_xy->GetYaxis()->SetTitle("X position [mm]");
+
+  h_init_xz = new TH2F(
+    "coms_init_xz", "Cosmic gen: generated initial point XZ",
+    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
+    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
+  );
+  h_init_xz->GetXaxis()->SetTitle("Z position [mm]");
+  h_init_xz->GetYaxis()->SetTitle("X position [mm]");
+
+  h_init_yz = new TH2F(
+    "coms_init_yz", "Cosmic gen: generated initial point YZ",
+    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1],
+    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
+  );
+  h_init_yz->GetXaxis()->SetTitle("Z position [mm]");
+  h_init_yz->GetYaxis()->SetTitle("Y position [mm]");
+
+  h_orig_xy = new TH2F(
+    "h_orig_xy", "Cosmic gen: origin point XY",
+    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
+    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1]
+  );
+  h_orig_xy->GetXaxis()->SetTitle("Y position [mm]");
+  h_orig_xy->GetYaxis()->SetTitle("X position [mm]");
+
+  h_orig_xz = new TH2F(
+    "h_orig_xz", "Cosmic gen: origin point XZ",
+    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
+    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
+  );
+  h_orig_xz->GetXaxis()->SetTitle("Z position [mm]");
+  h_orig_xz->GetYaxis()->SetTitle("X position [mm]");
+
+  h_orig_yz = new TH2F(
+    "h_orig_yz", "Cosmic gen: origin point YZ",
+    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1],
+    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
+  );
+  h_orig_yz->GetXaxis()->SetTitle("Z position [mm]");
+  h_orig_yz->GetYaxis()->SetTitle("Y position [mm]");
 }
 
 void HistoManager::FillHistoGenInfo(const G4Event* anEvent)
@@ -191,6 +247,18 @@ void HistoManager::FillHistoGenInfo(const G4Event* anEvent)
 
   fHisto[6]->Fill(fGeantInfo->GetMomentumGamma(1).Mag());
 }
+
+void HistoManager::FillCosmicInfo(G4double theta, G4ThreeVector init, G4ThreeVector orig)
+{
+  h_theta->Fill(theta);
+  h_init_xy->Fill(init.y(), init.x());
+  h_init_xz->Fill(init.z(), init.x());
+  h_init_yz->Fill(init.z(), init.y());
+  h_orig_xy->Fill(orig.y(), orig.x());
+  h_orig_xz->Fill(orig.z(), orig.x());
+  h_orig_yz->Fill(orig.z(), orig.y());
+}
+
 
 void HistoManager::AddGenInfoParticles(G4PrimaryParticle* particle)
 {
@@ -316,6 +384,15 @@ void HistoManager::Save()
     for (int i = 0; i < MaxHisto; i++) fHisto[i]->Write();
     for (int i = 0; i < MaxHisto2D; i++) fHisto2D[i]->Write();
   }
+
+  h_theta->Write();
+  h_init_xy->Write();
+  h_init_xz->Write();
+  h_init_yz->Write();
+  h_orig_xy->Write();
+  h_orig_xz->Write();
+  h_orig_yz->Write();
+
   fRootFile->Close();
   G4cout << "\n----> Histograms and ntuples are saved\n" << G4endl;
 }

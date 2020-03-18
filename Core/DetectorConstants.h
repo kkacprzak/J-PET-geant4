@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -53,6 +53,9 @@ public:
   static void SetMergingTimeValueForScin(G4double);
   static void SetChamberCenter(const G4ThreeVector);
   static const G4ThreeVector GetChamberCenter();
+
+  // Cosmics muons parameters
+  static const G4double muonChargeRatio;
 
 private:
   //! time in [ns]

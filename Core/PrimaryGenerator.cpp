@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -27,6 +27,7 @@
 #include <G4ParticleTable.hh>
 #include <Randomize.hh>
 #include <globals.hh>
+#include <TF1.h>
 
 PrimaryGenerator::PrimaryGenerator() : G4VPrimaryGenerator() {}
 
@@ -246,6 +247,7 @@ std::tuple<G4ThreeVector, MaterialExtension*> PrimaryGenerator::GetVerticesDistr
   };
   return std::make_tuple(myPoint, mat);
 }
+
 void PrimaryGenerator::GenerateEvtLargeChamber(G4Event* event)
 {
   G4ThreeVector chamberCenter = DetectorConstants::GetChamberCenter();
@@ -276,10 +278,78 @@ void PrimaryGenerator::GenerateEvtLargeChamber(G4Event* event)
   }
 
   //! Add prompt gamma from sodium
-  G4ThreeVector promptVtxPosition =  VertexUniformInCylinder(0.2 * cm, 0.2 * cm) + chamberCenter;
+  G4ThreeVector promptVtxPosition = VertexUniformInCylinder(0.2 * cm, 0.2 * cm) + chamberCenter;
   event->AddPrimaryVertex(GeneratePromptGammaVertex(
     promptVtxPosition, 0.0f, MaterialParameters::sodiumGammaTau, MaterialParameters::sodiumGammaEnergy
   ));
+}
+
+/**
+ * Generating vertex for cosmic radiation particle
+ * - choose randomly some point inside the detector cylinder,
+ * as cosmic particle has to fly through the detector anyway
+ * - choose particle momentum
+ * - choose muon charge with ratio of positive to negative muons
+ * in cosmic radiation at the sea level from https://arxiv.org/pdf/1005.5332.pdf
+ * - trace back the flight track of the particle to a point onto a cosmic roof,
+ * that is simulation worlds top dimension
+ * - add particle and vertex to an event with energy of 4 GeV, which is an
+ * mean for muons at sea level, according to PDG (30.3.1)
+ * http://pdg.lbl.gov/2017/reviews/rpp2017-rev-cosmic-rays.pdf
+ */
+void PrimaryGenerator::GenerateCosmicVertex(G4Event* event, HistoManager* histos)
+{
+  // Generating particle
+  G4ParticleDefinition* muonDefinition;
+  G4double muonFrac = DetectorConstants::muonChargeRatio/(1+DetectorConstants::muonChargeRatio);
+  if(muonFrac < G4UniformRand()){
+    muonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("mu+");
+  } else {
+    muonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("mu-");
+  }
+
+  // Generating angles
+  TF1 *cos2Func = new TF1("cos2", "pow(cos(x),2)", -twopi/4, twopi/4);
+  G4double theta = cos2Func->GetRandom();
+  G4double phi = G4UniformRand()*twopi;
+
+  // Cylinder of radius of third layer and half of sintillator dimension
+  G4ThreeVector posInDetector = VertexUniformInCylinder(
+    DetectorConstants::radius[2],
+    DetectorConstants::scinDim[2]/2
+  );
+
+  // projecting point from the cilinder onto "roof" of the simulation world
+  G4double heightDiff = DetectorConstants::world_size[0]-posInDetector.x();
+  G4double yzDiff = heightDiff*tan(theta);
+  G4double vtx_y = posInDetector.y()-yzDiff*cos(phi);
+  G4double vtx_z = posInDetector.z()-yzDiff*sin(phi);
+
+  G4ThreeVector origin(DetectorConstants::world_size[0], vtx_y, vtx_z);
+
+  G4PrimaryVertex* vertex = new G4PrimaryVertex();
+  vertex->SetPosition(DetectorConstants::world_size[0], vtx_y, vtx_z);
+
+  histos->FillCosmicInfo(theta, posInDetector, origin);
+
+  VtxInformation* info = new VtxInformation();
+  info->SetCosmicGen(true);
+  info->SetVtxPosition(DetectorConstants::world_size[0], vtx_y, vtx_z);
+  vertex->SetUserInformation(info);
+
+  G4PrimaryParticle* muon = new G4PrimaryParticle(
+    muonDefinition, -cos(theta)*4*GeV, sin(theta)*cos(phi)*4*GeV, sin(theta)*sin(phi)*4*GeV
+  );
+
+  PrimaryParticleInformation* infoParticle = new PrimaryParticleInformation();
+  infoParticle->SetGammaMultiplicity(PrimaryParticleInformation::kBackground);
+  infoParticle->SetGeneratedGammaMultiplicity(PrimaryParticleInformation::kBackground);
+  infoParticle->SetIndex(0);
+  infoParticle->SetGenMomentum(-cos(theta), -sin(theta)*cos(phi), -sin(theta)*sin(phi));
+  muon->SetUserInformation(infoParticle);
+
+  vertex->SetPrimary(muon);
+  event->AddPrimaryVertex(vertex);
 }
 
 void PrimaryGenerator::GenerateBeam(BeamParams* beamParams, G4Event* event)
