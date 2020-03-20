@@ -200,4 +200,3 @@ add_custom_command(
   ${CMAKE_CURRENT_SOURCE_DIR}/docs/manual_v3.0.pdf
   ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
-

@@ -27,7 +27,7 @@
 #include "RunManager.h"
 #include <G4Tubs.hh>
 #include <sstream>
-//gdml 
+//gdml
 //#include "G4GDMLParser.hh"
 
 DetectorConstruction* DetectorConstruction::fInstance = 0;
@@ -46,9 +46,9 @@ DetectorConstruction::DetectorConstruction() :
 {
   InitializeMaterials();
   fMessenger = new DetectorConstructionMessenger(this);
-    
+
     //for gdml files -
-    
+
 }
 
 DetectorConstruction::~DetectorConstruction()
@@ -62,7 +62,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4PhysicalVolumeStore::GetInstance()->Clean();
   G4LogicalVolumeStore::GetInstance()->Clean();
   G4SolidStore::GetInstance()->Clean();
-    
+
 
   //! world
   fWorldSolid = new G4Box(
@@ -71,7 +71,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     DetectorConstants::world_size[1],
     DetectorConstants::world_size[2]
 
-   
+
   );
 
   fWorldLogical = new G4LogicalVolume(fWorldSolid, fAir, "worldLogical");
@@ -106,7 +106,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     ConstructTargetRun7();
   }
 
-    
+
   return fWorldPhysical;
 }
 
@@ -217,9 +217,7 @@ void DetectorConstruction::InitializeMaterials()
  */
 void DetectorConstruction::ConstructFrameCAD()
 {
-    CADMesh* mesh1 = new CADMesh((char*)"/Users/sushilsharma/Geant4-xcode/project/Trento/build/bin/stl_geometry/DriftTubeTrento.stl");
-
-
+  CADMesh* mesh1 = new CADMesh((char*) "stl_geometry/DriftTubeTrento.stl");
 
   mesh1->SetScale(mm);
   G4VSolid* cad_solid1 = mesh1->TessellatedMesh();
@@ -326,9 +324,9 @@ void DetectorConstruction::ConstructScintillators()
  */
 void DetectorConstruction::ConstructScintillatorsModularLayer()
 {
-    
+
     // Construct the envelop for scintillators
-    
+
     // Envleope1 - Module for 13 scintillators SKS+++++++++++++++++++++==
     G4Box* SingleModule1= new G4Box("Module1",1.26*cm,4.51*cm,25.01*cm);
     G4LogicalVolume* logicSingleModule1 = new G4LogicalVolume(SingleModule1,
@@ -343,58 +341,58 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
                                                              fScinMaterial,
                                                              "Module2");
     G4PVPlacement(0,G4ThreeVector(38.186*cm,0.,0),logicSingleModule2,"Module2",fWorldLogical,false,0);
-    
-    
+
+
     //Visualization attributes for the envelope
     G4VisAttributes* sourceGVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
     sourceGVisAtt->SetForceWireframe(true);
    // sourceGVisAtt->SetForceSolid(true);
     logicSingleModule1->SetVisAttributes(sourceGVisAtt);
-    
+
     G4Box* scinBoxInModule = new G4Box(
                                        "scinBoxInModule",
                                        DetectorConstants::scinDim_inModule[0] / 2.0,
                                        DetectorConstants::scinDim_inModule[1] / 2.0,
                                        DetectorConstants::scinDim_inModule[2] / 2.0
-                                       );    
+                                       );
     fScinLogInModule = new G4LogicalVolume(
                                            scinBoxInModule, fScinMaterial, "scinBoxInModule"
                                            );
-    
+
     // Visualization of plastic scintillators -
     G4VisAttributes* BoxVisAttI=  new G4VisAttributes(G4Colour(1.,0.1,1.));
    // BoxVisAttI->SetForceWireframe(true);
     BoxVisAttI->SetForceSolid(true);
     fScinLogInModule->SetVisAttributes(BoxVisAttI);
-    
+
   G4VPhysicalVolume* fEnvelopePhysical;
   //  G4double phi=0,radius1 = 38.186*cm;
-    
+
   // G4double phi=0,radius1 = 58.186*cm;
   //    G4double phi=0, radius1=35.1*cm;
-   
+
  //G4double phi = 0, radius1 = 1*cm;
 
     G4int scint_number = 0;
     G4int SCopy = 0;
- 
+
     for(int i=0; i<2; i++)
         {
-        
+
      //   G4int scint_number=1;
-        
+
         G4double phi = (i*2*M_PI/24.);
 	//	        phi=-0.785;
         scint_number=1;
-    
+
 		phi=0.0;
         for(int j=-6; j<7; j++)                  // 13 modules
             {
-            
+
             double ScinPlacement = j*0.7;        // distance between the centers of two consecutive modules
-            
+
             G4String nameNewI = "Module_"+G4UIcommand::ConvertToString(i*13+scint_number);
-            
+
             SCopy = i*13+scint_number;
             G4cout<<" Scintillator ids assing = "<<SCopy<<G4endl;
 
@@ -423,25 +421,25 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
                               checkOverlaps); // checking overlaps
 	      }
             scint_number++;
-            
+
             }
-        
-        
-        
+
+
+
         G4RotationMatrix rot = G4RotationMatrix();
-        
+
         rot.rotateZ(phi);
-        
+
         //G4double rotation = phi*i;
-        
+
         G4double rotation = phi;
-        
+
         G4ThreeVector loc;
-        
+
          if(i==0)  loc = G4ThreeVector(-8*cm *cos(phi),-8.0*cm *sin(phi),0.0);  // Angular displacement in the modules
-        
+
          else if(i==1) loc = G4ThreeVector(8.0*cm *cos(phi),8.0*cm *sin(phi),0.0*cm);  // Angular displacement in the modules
-        
+
         G4Transform3D transform(rot,loc);
         if(i==0)
 	  {
@@ -465,12 +463,12 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
 	  }
         }
 }
-    
-    
-    
+
+
+
 /*
 // 8 Modules as per the J-PET convention
-    
+
   G4Box* scinBoxInModule = new G4Box(
     "scinBoxInModule",
     DetectorConstants::scinDim_inModule[0] / 2.0,
@@ -494,16 +492,16 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
   //! radius0 = 38.186*cm
   //! displacement -> Angular displacement
   //! (1.04 degree / 0.01815 radius - fixed; value provided by Sushil)
- 
+
     //const G4double radius_inner[13] = {
     //38.416, 38.346, 38.289, 38.244, 38.212, 38.192,
     //38.186, 38.192, 38.212, 38.244, 38.289, 38.346, 38.416
   //};
-  
+
     const G4double radius_inner[13] = {
         13.4037, 13.2011, 13.0330, 12.9007, 12.8055, 12.7479, 12.7287,
         12.7479, 12.8055, 12.9007, 13.0330, 13.2011, 13.4037};
-    
+
   G4double phi1 = 0.0;
   //! sum of already constructed scintillators;
   G4int icopyI = 193;

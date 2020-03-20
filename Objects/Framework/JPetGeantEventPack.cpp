@@ -15,7 +15,7 @@
 
 #include "JPetGeantEventPack.h"
 
-ClassImp(JPetGeantEventPack)
+ClassImp(JPetGeantEventPack);
 
 JPetGeantEventPack::JPetGeantEventPack() :
   fMCHits("JPetGeantScinHits", 10000), fMCDecayTrees("JPetGeantDecayTree", 1000),

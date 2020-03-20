@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Monte Carlo Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Monte Carlo Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -31,7 +31,6 @@ JPetGeantScinHits::JPetGeantScinHits(
   fGenGammaMultiplicity(0), fEneDep(ene), fTime(time), fPosition(hit),
   fPolarizationIn(0, 0, 0), fPolarizationOut(0, 0, 0), fMomentumIn(0, 0, 0),
   fMomentumOut(0, 0, 0) {}
-
 
 JPetGeantScinHits::JPetGeantScinHits(
   int evID, int scinID, int trkID, int trkPDG, int nInter, float ene, float time,
