@@ -28,29 +28,97 @@ HistoManager::HistoManager() : fMakeControlHisto(true)
 
 HistoManager::~HistoManager() {}
 
+void HistoManager::createHistogramWithAxes(TObject* object, TString xAxisName, TString yAxisName, TString zAxisName)
+{
+  TClass *cl = object->IsA();
+  if (cl->InheritsFrom("TH1D"))
+  {
+    TH1D* tempHisto = static_cast<TH1D*>(object);
+    tempHisto->GetXaxis()->SetTitle(xAxisName);
+    tempHisto->GetYaxis()->SetTitle(yAxisName);
+  }
+  else if (cl->InheritsFrom("TH2D"))
+  {
+    TH2D* tempHisto = static_cast<TH2D*>(object);
+    tempHisto->GetXaxis()->SetTitle(xAxisName);
+    tempHisto->GetYaxis()->SetTitle(yAxisName);
+  }
+  else if (cl->InheritsFrom("TH3D"))
+  {
+    TH3D* tempHisto = static_cast<TH3D*>(object);
+    tempHisto->GetXaxis()->SetTitle(xAxisName);
+    tempHisto->GetYaxis()->SetTitle(yAxisName);
+    tempHisto->GetZaxis()->SetTitle(zAxisName);
+  }
+  fStats.Add(object);
+}
+
+void HistoManager::fillHistogram(const char* name, double xValue, doubleCheck yValue, doubleCheck zValue)
+{
+  TObject *tempObject = getObject<TObject>(name);
+  if (!tempObject)
+  {
+    writeError(name, " does not exist");
+    return;
+  }
+  TClass *cl = tempObject->IsA();
+  if (cl->InheritsFrom("TH1D"))
+  {
+    TH1D* tempHisto = static_cast<TH1D*>(tempObject);
+    tempHisto->Fill(xValue);
+  }
+  else if (cl->InheritsFrom("TH2D"))
+  {
+    TH2D* tempHisto = static_cast<TH2D*>(tempObject);
+    if (yValue.isChanged)
+      tempHisto->Fill(xValue, yValue.value);
+    else
+      writeError(name, " does not received argument for Y axis" );
+  }
+  else if (cl->InheritsFrom("TH3D"))
+  {
+    TH3D* tempHisto = static_cast<TH3D*>(tempObject);
+    if (zValue.isChanged)
+      tempHisto->Fill(xValue, yValue.value, zValue.value);
+    else if (yValue.isChanged)
+      writeError(name, " does not received argument for Y and Z axis");
+    else
+      writeError(name, " does not received argument for Z axis");
+  }
+  else
+  {
+    writeError(name, " is not of any of used types (TH1D, TH2D, TH3D)" );
+  }
+}
+
 void HistoManager::Book()
 {
+  if(fbookStatus)
+    return;
+
   G4String fileName = "mcGeant.root";
 
-  if(fEvtMessenger->AddDatetime()){
+  if (fEvtMessenger->AddDatetime())
+  {
     TDatime* now = new TDatime();
     std::string a_year = std::to_string(now->GetYear());
     std::string a_month = std::to_string(now->GetMonth());
-    if(a_month.length() == 1) { a_month = std::string("0")+a_month; }
+    if(a_month.length() == 1) {a_month = std::string("0")+a_month;}
     std::string a_day = std::to_string(now->GetDay());
-    if(a_day.length() == 1) { a_day = std::string("0")+a_day; }
+    if(a_day.length() == 1) {a_day = std::string("0")+a_day;}
     std::string a_hour = std::to_string(now->GetHour());
-    if(a_hour.length() == 1) { a_hour = std::string("0")+a_hour; }
+    if(a_hour.length() == 1) {a_hour = std::string("0")+a_hour;}
     std::string a_minute = std::to_string(now->GetMinute());
-    if(a_minute.length() == 1) { a_minute = std::string("0")+a_minute; }
+    if(a_minute.length() == 1) {a_minute = std::string("0")+a_minute;}
     std::string a_second = std::to_string(now->GetSecond());
-    if(a_second.length() == 1) { a_second = std::string("0")+a_second; }
+    if(a_second.length() == 1) {a_second = std::string("0")+a_second;}
     std::string dateTime = a_year+"_"+a_month+"_"+a_day+"-"+a_hour+"_"+a_minute+"_"+a_second;
     fileName = dateTime+"."+fileName;
   }
 
   fRootFile = new TFile(fileName, "RECREATE");
-  if (! fRootFile) {
+  if (! fRootFile)
+  {
     G4cout << " HistoManager::Book :" << " problem creating the ROOT TFile " << G4endl;
     return;
   }
@@ -63,208 +131,93 @@ void HistoManager::Book()
   fTree->SetAutoSave(1000000000);
   fBranchEventPack = fTree->Branch("eventPack", &fEventPack, bufsize, splitlevel);
 
-  if (MakeControlHisto()) {
+  if (GetMakeControlHisto())
     BookHistograms();
-  }
+
+  fbookStatus = true;
 }
 
 void HistoManager::BookHistograms()
 {
-  fHisto[0] = new TH1F("gen_gamma_multiplicity", "Generated gammas multiplicity", 10, 0, 10);
-  fHisto[0]->GetXaxis()->SetTitle("Gamma quanta multiplicity: 1=prompt; 2=2g; 3=3g");
-  fHisto[0]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_gamma_multiplicity", "Generated gammas multiplicity", 10, -0.5, 9.5),
+                          "Gamma quanta multiplicity: 1=prompt; 2=2g; 3=3g", "Entries");
 
-  fHisto[1] = new TH1F("gen_hit_time", "Gen hit time", 100, 0.0, 15000.0);
-  fHisto[1]->GetXaxis()->SetTitle("Hit-times in scintillators [ps]");
-  fHisto[1]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_hit_time", "Generated hit time", 100, -75.0, 14925.0),
+                          "Hit-times in scintillators [ps]", "Entries");
 
-  fHisto[2] = new TH1F("gen_hit_eneDepos", "Gen hit ene deposition", 750, 0.0, 1500.0);
-  fHisto[2]->GetXaxis()->SetTitle("Deposited energy in scintillators [keV]");
-  fHisto[2]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_hit_eneDepos", "Generated hit energy deposition", 750, -1.0, 1499.0),
+                          "Deposited energy in scintillators [keV]", "Entries");
 
-  fHisto[3] = new TH1F("gen_hits_z_pos", "gen hits Z position", 100, -60.0, 60.0);
-  fHisto[3]->GetXaxis()->SetTitle("Hit-position along z [cm]");
-  fHisto[3]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_hits_z_pos", "Generated hits Z position", 120, -59.5, 60.5),
+                          "Hit-position along Z [cm]", "Entries");
 
-  fHisto[4] = new TH1F("gen_lifetime", "Gen lifetime", 100, 0.0, 1500.0);
-  fHisto[4]->GetXaxis()->SetTitle("Lifetime (2/3g) [ps]");
-  fHisto[4]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH2D("gen_hits_xy_pos", "Generated hits XY positions", 120, -59.5, 60.5, 120, -59.5, 60.5),
+                          "Hit-position X [cm]", "Hit-position Y [cm]");
 
-  fHisto[5] = new TH1F("gen_prompt_lifetime", "Gen prompt lifetime", 100, 0.0, 1500.0);
-  fHisto[5]->GetXaxis()->SetTitle("Lifetime prompt gamma [ps]");
-  fHisto[5]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_lifetime", "Generated lifetime", 2000, -50.0, 199950.0),
+                          "Lifetime (2/3g) [ps]", "Entries");
 
-  fHisto[6] = new TH1F("gen_g_ene", "Gen energy", 200, 0.0, 1500.0);
-  fHisto[6]->GetXaxis()->SetTitle("E_1 gen [keV]");
-  fHisto[6]->GetYaxis()->SetTitle("Entries");
+  createHistogramWithAxes(new TH1D("gen_prompt_lifetime", "Gen prompt lifetime", 100, -5.0, 995.0),
+                          "Lifetime prompt gamma [ps]", "Entries");
 
-  fHisto2D[0] = new TH2F(
-    "gen_hits_xy_pos", "GEN hits XY pos", 121, -60.5, 60.5, 121, -60.5, 60.5
-  );
-  fHisto2D[0]->GetXaxis()->SetTitle("Hit-position X [cm]");
-  fHisto2D[0]->GetYaxis()->SetTitle("Hit-position Y [cm]");
+  createHistogramWithAxes(new TH2D("gen_XY", "Generated XY coordinates of annihilation point", 50, -24.5, 25.5, 50, -24.5, 25.5),
+                          "Annihilation point (2/3g) X [cm]", "Annihilation point (2/3g) Y [cm]");
 
-  fHisto2D[1] = new TH2F(
-    "gen_XY", "GEN XY coordinates of annihilation point",
-    121, -21.5, 21.5, 121, -21.5, 21.5
-  );
-  fHisto2D[1]->GetXaxis()->SetTitle("Annihilation point (2/3g) X [cm]");
-  fHisto2D[1]->GetYaxis()->SetTitle("Annihilation point (2/3g) Y [cm]");
+  createHistogramWithAxes(new TH2D("gen_XZ", "Generated XZ coordinates of annihilation point", 50, -24.5, 25.5, 120, -59.5, 60.5),
+                          "Annihilation point (2/3g) X [cm]", "Annihilation point (2/3g) Z [cm]");
 
-  fHisto2D[2] = new TH2F(
-    "gen_XZ", "GEN XZ coordinates of annihilation point",
-    121, -21.5, 21.5, 121, -60.5, 60.5
-  );
-  fHisto2D[2]->GetXaxis()->SetTitle("Annihilation point (2/3g) X [cm]");
-  fHisto2D[2]->GetYaxis()->SetTitle("Annihilation point (2/3g) Z [cm]");
+  createHistogramWithAxes(new TH2D("gen_YZ", "Generated YZ coordinates of annihilation point", 50, -24.5, 25.5, 120, -59.5, 60.5),
+                          "Annihilation point (2/3g) Y [cm]", "Annihilation point (2/3g) Z [cm]");
 
-  fHisto2D[3] = new TH2F(
-    "gen_YZ", "GEN YZ coordinates of  annihilation point",
-    121, -21.5, 21.5, 121, -60.5, 60.5
-  );
-  fHisto2D[3]->GetXaxis()->SetTitle("Annihilation point (2/3g) Y [cm]");
-  fHisto2D[3]->GetYaxis()->SetTitle("Annihilation point (2/3g) Z [cm]");
+  createHistogramWithAxes(new TH2D("gen_prompt_XY", "Generated XY coordinates of annihilation point", 50, -24.5, 25.5, 50, -24.5, 25.5),
+                          "Prompt emission point X [cm]", "Prompt emission point Y [cm]");
 
-  fHisto2D[4] = new TH2F(
-    "gen_prompt_XY", "GEN prompt XY coordinates of annihilation point",
-    121, -21.5, 21.5, 121, -21.5, 21.5
-  );
-  fHisto2D[4]->GetXaxis()->SetTitle("Prompt emission point X [cm]");
-  fHisto2D[4]->GetYaxis()->SetTitle("Prompt emission point Y [cm]");
+  createHistogramWithAxes(new TH2D("gen_prompt_XZ", "Generated XZ coordinates of annihilation point", 50, -24.5, 25.5, 120, -59.5, 60.5),
+                          "Prompt emission point X [cm]", "Prompt emission point Z [cm]");
 
-  fHisto2D[5] = new TH2F(
-    "gen_prompt_XZ", "GEN prompt XZ coordinates of annihilation point",
-    121, -21.5, 21.5, 121, -60.5, 60.5
-  );
-  fHisto2D[5]->GetXaxis()->SetTitle("Prompt emission point X [cm]");
-  fHisto2D[5]->GetYaxis()->SetTitle("Prompt emission point Z [cm]");
+  createHistogramWithAxes(new TH2D("gen_prompt_YZ", "Generated YZ coordinates of annihilation point", 50, -24.5, 25.5, 120, -59.5, 60.5),
+                          "Prompt emission point Y [cm]", "Prompt emission point Z [cm]");
 
-  fHisto2D[6] = new TH2F(
-    "gen_prompt_YZ", "GEN prompt YZ coordinates of  annihilation point",
-    121, -21.5, 21.5, 121, -60.5, 60.5
-  );
-  fHisto2D[6]->GetXaxis()->SetTitle("Prompt emission point Y [cm]");
-  fHisto2D[6]->GetYaxis()->SetTitle("Prompt emission point Z [cm]");
+  createHistogramWithAxes(new TH2D("gen_3g_angles", "Generated angles of 3g", 190, -0.5, 189.5, 190, -0.5, 189.5),
+                          "#Theta_{12} [degree]", "#Theta_{23} [degree]");
 
-  fHisto2D[7] = new TH2F(
-    "gen_3g_angles", "GEN angles 3g", 190, -5., 185., 190, -5., 185.
-  );
-  fHisto2D[7]->GetXaxis()->SetTitle("#Theta_{12} [degree]");
-  fHisto2D[7]->GetYaxis()->SetTitle("#Theta_{23} [degree]");
+  createHistogramWithAxes(new TH2D("gen_energy", "Generated energy of 3g", 120, -2.5, 597.5, 120, -2.5, 597.5),
+                          "E_1 [keV]", "E_2 [keV]");
 
-  fHisto2D[8] = new TH2F(
-    "gen_energy", "GEN E_1 vs E_2", 100, 0., 550., 100, 0., 550.
-  );
-  fHisto2D[8]->GetXaxis()->SetTitle("E_{1} [keV]");
-  fHisto2D[8]->GetYaxis()->SetTitle("E_{2} [keV]");
+  createHistogramWithAxes(new TH1D("gen_g_ene", "Generated energy", 300, -2.5, 1497.5),
+                          "E_1 generated [keV]", "Entries");
 
-  h_theta = new TH1F(
-    "cosm_theta", "Cosmmic gen: theta angle",
-    181, -CLHEP::twopi/4, CLHEP::twopi/4
-  );
-  h_theta->GetXaxis()->SetTitle("theta [rad]");
-  h_theta->GetYaxis()->SetTitle("number of entries");
-
-  h_init_xy = new TH2F(
-    "coms_init_xy", "Cosmic gen: generated initial point XY",
-    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
-    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
-  );
-  h_init_xy->GetXaxis()->SetTitle("Y position [mm]");
-  h_init_xy->GetYaxis()->SetTitle("X position [mm]");
-
-  h_init_xz = new TH2F(
-    "coms_init_xz", "Cosmic gen: generated initial point XZ",
-    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
-    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
-  );
-  h_init_xz->GetXaxis()->SetTitle("Z position [mm]");
-  h_init_xz->GetYaxis()->SetTitle("X position [mm]");
-
-  h_init_yz = new TH2F(
-    "coms_init_yz", "Cosmic gen: generated initial point YZ",
-    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1],
-    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
-  );
-  h_init_yz->GetXaxis()->SetTitle("Z position [mm]");
-  h_init_yz->GetYaxis()->SetTitle("Y position [mm]");
-
-  h_orig_xy = new TH2F(
-    "h_orig_xy", "Cosmic gen: origin point XY",
-    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
-    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1]
-  );
-  h_orig_xy->GetXaxis()->SetTitle("Y position [mm]");
-  h_orig_xy->GetYaxis()->SetTitle("X position [mm]");
-
-  h_orig_xz = new TH2F(
-    "h_orig_xz", "Cosmic gen: origin point XZ",
-    200, -1.1*DetectorConstants::world_size[0], 1.1*DetectorConstants::world_size[0],
-    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
-  );
-  h_orig_xz->GetXaxis()->SetTitle("Z position [mm]");
-  h_orig_xz->GetYaxis()->SetTitle("X position [mm]");
-
-  h_orig_yz = new TH2F(
-    "h_orig_yz", "Cosmic gen: origin point YZ",
-    200, -1.1*DetectorConstants::world_size[1], 1.1*DetectorConstants::world_size[1],
-    200, -1.1*DetectorConstants::world_size[2], 1.1*DetectorConstants::world_size[2]
-  );
-  h_orig_yz->GetXaxis()->SetTitle("Z position [mm]");
-  h_orig_yz->GetYaxis()->SetTitle("Y position [mm]");
+  createHistogramWithAxes(new TH2D("gen_gamma_multiplicity_vs_lifetime", "Generated gammas multiplicity vs generated lifetime",
+                           10, -0.5, 9.5, 1000, -50.0, 99950.0), "Gamma quanta multiplicity: 2=2g; 3=3g", "Lifetime (2/3g) [ps]");
 }
 
 void HistoManager::FillHistoGenInfo(const G4Event* anEvent)
 {
-  for ( int i = 0; i < anEvent->GetNumberOfPrimaryVertex(); i++) {
-    VtxInformation* info = dynamic_cast<VtxInformation*>(
-      anEvent->GetPrimaryVertex(i)->GetUserInformation()
-    );
-    if (info != 0) {
+  for (int i = 0; i < anEvent->GetNumberOfPrimaryVertex(); i++)
+  {
+    VtxInformation* info = dynamic_cast<VtxInformation*>(anEvent->GetPrimaryVertex(i)->GetUserInformation());
+    if (info != 0)
       AddGenInfo(info);
-    }
 
-    for (int j = 0; j < anEvent->GetPrimaryVertex(i)->GetNumberOfParticle(); j++) {
+    for (int j = 0; j < anEvent->GetPrimaryVertex(i)->GetNumberOfParticle(); j++)
+    {
       G4PrimaryParticle* particle = anEvent->GetPrimaryVertex(i)->GetPrimary(j);
-      if (particle != nullptr ) {
-        AddGenInfoParticles(particle);
-      }
+      if (particle != nullptr) {AddGenInfoParticles(particle);}
     }
   }
 
-  double theta_12 = (180. / TMath::Pi()) * (
-    fGeantInfo->GetMomentumGamma(1)).Angle(fGeantInfo->GetMomentumGamma(2)
-  );
-  double theta_23 = (180. / TMath::Pi()) * (
-    fGeantInfo->GetMomentumGamma(2)).Angle(fGeantInfo->GetMomentumGamma(3)
-  );
+  double theta_12 = (180. / TMath::Pi()) * (fGeantInfo->GetMomentumGamma(1)).Angle(fGeantInfo->GetMomentumGamma(2));
+  double theta_23 = (180. / TMath::Pi()) * (fGeantInfo->GetMomentumGamma(2)).Angle(fGeantInfo->GetMomentumGamma(3));
 
-  fHisto2D[7]->Fill(theta_12, theta_23);
-  fHisto2D[8]->Fill(
-    fGeantInfo->GetMomentumGamma(1).Mag(),
-    fGeantInfo->GetMomentumGamma(2).Mag()
-  );
-
-  fHisto[6]->Fill(fGeantInfo->GetMomentumGamma(1).Mag());
+  fillHistogram("gen_3g_angles", theta_12, theta_23);
+  fillHistogram("gen_energy", fGeantInfo->GetMomentumGamma(1).Mag(), fGeantInfo->GetMomentumGamma(2).Mag());
+  fillHistogram("gen_g_ene", fGeantInfo->GetMomentumGamma(1).Mag());
 }
-
-void HistoManager::FillCosmicInfo(G4double theta, G4ThreeVector init, G4ThreeVector orig)
-{
-  h_theta->Fill(theta);
-  h_init_xy->Fill(init.y(), init.x());
-  h_init_xz->Fill(init.z(), init.x());
-  h_init_yz->Fill(init.z(), init.y());
-  h_orig_xy->Fill(orig.y(), orig.x());
-  h_orig_xz->Fill(orig.z(), orig.x());
-  h_orig_yz->Fill(orig.z(), orig.y());
-}
-
 
 void HistoManager::AddGenInfoParticles(G4PrimaryParticle* particle)
 {
-  PrimaryParticleInformation* infoParticle =
-    static_cast<PrimaryParticleInformation*> (particle->GetUserInformation());
-  if (infoParticle == nullptr) { return; }
+  PrimaryParticleInformation* infoParticle = static_cast<PrimaryParticleInformation*> (particle->GetUserInformation());
+  if (infoParticle == nullptr) {return;}
   G4int index = infoParticle->GetIndex();
   G4ThreeVector genMom = infoParticle->GenGenMomentum();
   fGeantInfo->SetMomentumGamma( index, genMom.x() / keV, genMom.y() / keV, genMom.z() / keV);
@@ -282,39 +235,47 @@ void HistoManager::AddGenInfo(VtxInformation* info)
   bool is2g = info->GetTwoGammaGen();
   bool isprompt = info->GetPromptGammaGen();
 
-  if (is2g || is3g) {
+  if (is2g || is3g)
+  {
     fGeantInfo->SetThreeGammaGen(is3g);
     fGeantInfo->SetTwoGammaGen(is2g);
-    fGeantInfo->SetVtxPosition(
-      info->GetVtxPositionX() / cm,
-      info->GetVtxPositionY() / cm,
-      info->GetVtxPositionZ() / cm);
+    fGeantInfo->SetVtxPosition( info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     fGeantInfo->SetLifetime(info->GetLifetime() / ps);
     fGeantInfo->SetRunNr(info->GetRunNr());
 
-    if (MakeControlHisto()) {
-      if (is2g) fHisto[0]->Fill(2);
-      if (is3g) fHisto[0]->Fill(3);
-      fHisto[4]->Fill(info->GetLifetime() / ps);
-      fHisto2D[1]->Fill(info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm);
-      fHisto2D[2]->Fill(info->GetVtxPositionX() / cm, info->GetVtxPositionZ() / cm);
-      fHisto2D[3]->Fill(info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
+    if (GetMakeControlHisto())
+    {
+      if (is2g)
+      {
+        fillHistogram("gen_gamma_multiplicity", 2 );
+        fillHistogram("gen_gamma_multiplicity_vs_lifetime", 2, info->GetLifetime() / ps);
+      }
+      if (is3g)
+      {
+        fillHistogram("gen_gamma_multiplicity", 3 );
+        fillHistogram("gen_gamma_multiplicity_vs_lifetime", 3, info->GetLifetime() / ps);
+      }
+      fillHistogram("gen_lifetime", info->GetLifetime() / ps );
+      fillHistogram("gen_XY", info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm);
+      fillHistogram("gen_XZ", info->GetVtxPositionX() / cm, info->GetVtxPositionZ() / cm);
+      fillHistogram("gen_YZ", info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     }
   }
 
-  if (isprompt) {
+  if (isprompt)
+  {
     fGeantInfo->SetPromptGammaGen(isprompt);
     fGeantInfo->SetPromptLifetime(info->GetLifetime() / ps);
-    fGeantInfo->SetVtxPromptPosition(
-      info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm
-    );
+    fGeantInfo->SetVtxPromptPosition(info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     fGeantInfo->SetRunNr(info->GetRunNr());
-    if (MakeControlHisto()) {
-      fHisto[0]->Fill(1);
-      fHisto[5]->Fill(info->GetLifetime() / ps);
-      fHisto2D[4]->Fill(info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm);
-      fHisto2D[5]->Fill(info->GetVtxPositionX() / cm, info->GetVtxPositionZ() / cm);
-      fHisto2D[6]->Fill(info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
+
+    if (GetMakeControlHisto())
+    {
+      fillHistogram("gen_gamma_multiplicity", 1 );
+      fillHistogram("gen_prompt_lifetime", info->GetLifetime() / ps );
+      fillHistogram("gen_prompt_XY", info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm);
+      fillHistogram("gen_prompt_XZ", info->GetVtxPositionX() / cm, info->GetVtxPositionZ() / cm);
+      fillHistogram("gen_prompt_YZ", info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     }
   }
 }
@@ -329,70 +290,50 @@ void HistoManager::AddNewHit(DetectorHit* hit)
     hit->GetTrackPDG(),
     hit->GetNumInteractions(),
     hit->GetEdep() / keV,
-    hit->GetTime() / ps
-  );
+    hit->GetTime() / ps );
 
   //! Converting G4Vector into root TVector3
-  geantHit->SetHitPosition(
-    hit->GetPosition().getX() / cm,
-    hit->GetPosition().getY() / cm,
-    hit->GetPosition().getZ() / cm
-  );
-
-  geantHit->SetPolarizationIn(
-    hit->GetPolarizationIn().getX(),
-    hit->GetPolarizationIn().getY(),
-    hit->GetPolarizationIn().getZ()
-  );
-
-  geantHit->SetPolarizationOut(
-    hit->GetPolarizationOut().getX(),
-    hit->GetPolarizationOut().getY(),
-    hit->GetPolarizationOut().getZ()
-  );
-
-  geantHit->SetMomentumIn(
-    hit->GetMomentumIn().getX() / keV,
-    hit->GetMomentumIn().getY() / keV,
-    hit->GetMomentumIn().getZ() / keV
-  );
-
-  geantHit->SetMomentumOut(
-    hit->GetMomentumOut().getX() / keV,
-    hit->GetMomentumOut().getY() / keV,
-    hit->GetMomentumOut().getZ() / keV
-  );
-
+  geantHit->SetHitPosition(hit->GetPosition().getX() / cm, hit->GetPosition().getY() / cm, hit->GetPosition().getZ() / cm);
+  geantHit->SetPolarizationIn(hit->GetPolarizationIn().getX(), hit->GetPolarizationIn().getY(), hit->GetPolarizationIn().getZ());
+  geantHit->SetPolarizationOut(hit->GetPolarizationOut().getX(), hit->GetPolarizationOut().getY(), hit->GetPolarizationOut().getZ());
+  geantHit->SetMomentumIn(hit->GetMomentumIn().getX() / keV, hit->GetMomentumIn().getY() / keV, hit->GetMomentumIn().getZ() / keV);
+  geantHit->SetMomentumOut(hit->GetMomentumOut().getX() / keV, hit->GetMomentumOut().getY() / keV, hit->GetMomentumOut().getZ() / keV);
   geantHit->SetGenGammaMultiplicity(hit->GetGenGammaMultiplicity());
   geantHit->SetGenGammaIndex(hit->GetGenGammaIndex());
 
-  if (MakeControlHisto()) {
-    fHisto[1]->Fill(hit->GetTime() / ps);
-    fHisto[2]->Fill(hit->GetEdep() / keV);
-    fHisto[3]->Fill(hit->GetPosition().getZ() / cm);
-    fHisto2D[0]->Fill(
-      hit->GetPosition().getX() / cm, hit->GetPosition().getY() / cm
-    );
+  if (GetMakeControlHisto())
+  {
+    fillHistogram("gen_hit_time", hit->GetTime() / ps);
+    fillHistogram("gen_hit_eneDepos", hit->GetEdep() / keV);
+    fillHistogram("gen_hits_z_pos", hit->GetPosition().getZ() / cm);
+    fillHistogram("gen_hits_xy_pos", hit->GetPosition().getX() / cm, hit->GetPosition().getY() / cm);
   }
 }
 
 void HistoManager::Save()
 {
-  if (!fRootFile) return;
+  if (!fRootFile)
+    return;
   fTree->Write();
-  if (MakeControlHisto()) {
-    for (int i = 0; i < MaxHisto; i++) fHisto[i]->Write();
-    for (int i = 0; i < MaxHisto2D; i++) fHisto2D[i]->Write();
+  if (GetMakeControlHisto())
+  {
+    TIterator* it = fStats.MakeIterator();
+    TObject* obj;
+    while ((obj = it->Next()))
+      obj->Write();
   }
-
-  h_theta->Write();
-  h_init_xy->Write();
-  h_init_xz->Write();
-  h_init_yz->Write();
-  h_orig_xy->Write();
-  h_orig_xz->Write();
-  h_orig_yz->Write();
 
   fRootFile->Close();
   G4cout << "\n----> Histograms and ntuples are saved\n" << G4endl;
+}
+
+void HistoManager::writeError(const char* nameOfHistogram, const char* messageEnd)
+{
+    std::string histName (nameOfHistogram);
+    bool histExists =  (fErrorCounts.find(histName) != fErrorCounts.end());
+    if (!histExists)
+    {
+        fErrorCounts.insert(histName);
+        std::cout << "!!![Error]!!!  -  Histogram with name " << histName << " " << messageEnd << std::endl;
+    }
 }

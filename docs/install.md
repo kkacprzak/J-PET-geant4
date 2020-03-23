@@ -12,7 +12,7 @@
 ## How to compile?
 `mkdir build`  
 `cd build`  
-`cmake ..`  
+`cmake .. -DCMAKE_PREFIX_PATH=path_to_the_directory_containing_cadmesh-config.cmake`  
 `make`  
 output file: (in build folder)  
 `bin/jpet_mc`  

@@ -28,42 +28,14 @@ public:
   void Clear();
   virtual void Print() const;
 
-  G4int GetIndex()
-  {
-    return fIndex;
-  }
-
-  G4int GetGammaMultiplicity()
-  {
-    return fDecayMultiplicity;
-  }
-
-  G4int GetGeneratedGammaMultiplicity()
-  {
-    return fGeneratedMultiplicity;
-  }
-
-  void SetGeneratedGammaMultiplicity(G4int i)
-  {
-    fGeneratedMultiplicity = i;
-  }
-
-  void SetIndex(G4int i)
-  {
-    fIndex = i;
-  }
-
-  void SetGammaMultiplicity(G4int i)
-  {
-    fDecayMultiplicity = i;
-  }
-
+  G4int GetIndex() {return fIndex;}
+  G4int GetGammaMultiplicity() {return fDecayMultiplicity;}
+  G4int GetGeneratedGammaMultiplicity() {return fGeneratedMultiplicity;}
+  void SetGeneratedGammaMultiplicity(G4int i) {fGeneratedMultiplicity = i;}
+  void SetIndex(G4int i) {fIndex = i;}
+  void SetGammaMultiplicity(G4int i) { fDecayMultiplicity = i; }
   void SetGenMomentum(G4double x, G4double y, G4double z);
-
-  G4ThreeVector GenGenMomentum()
-  {
-    return fGenMomentum;
-  }
+  G4ThreeVector GenGenMomentum() {return fGenMomentum;}
 
   //! Multiplicity flags
   static const G4int kBackground = 0;
@@ -76,7 +48,6 @@ private:
   G4int fDecayMultiplicity;
   G4int fGeneratedMultiplicity;
   G4ThreeVector fGenMomentum;
-
 };
 
 #endif

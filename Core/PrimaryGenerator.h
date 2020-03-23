@@ -40,13 +40,12 @@ public:
   void GenerateNema(G4int, G4Event*);
   void GenerateEvtSmallChamber(G4Event* event, const G4double);
   void GenerateEvtLargeChamber(G4Event* event);
-  void GenerateCosmicVertex(G4Event* event, HistoManager* histos);
+  void GenerateCosmicVertex(G4Event* event);
   virtual void GeneratePrimaryVertex(G4Event*) {};
 
 private:
   //! return: vtx position, 2/3g ratio, meanlifetime;
   //! as input the maximal dimension(/2) of annihilation chamber are taken (to speed up simulatons)
-  std::tuple<G4ThreeVector, G4double, G4double> GetVerticesDistribution(G4double, G4double, G4double);
   std::tuple<G4ThreeVector, MaterialExtension*> GetVerticesDistributionInFilledSphere(const G4ThreeVector center, G4double radius);
   std::tuple<G4ThreeVector, MaterialExtension*> GetVerticesDistributionAlongStepVector(const G4ThreeVector center, const G4ThreeVector direction);
   G4PrimaryVertex* GenerateTwoGammaVertex(const G4ThreeVector vtxPosition, const G4double T0, const G4double lifetime2g);

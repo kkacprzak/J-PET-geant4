@@ -26,7 +26,6 @@ public:
 
 private:
   EventMessenger* fEvtMessenger = EventMessenger::GetEventMessenger();
-
 };
 
 #endif

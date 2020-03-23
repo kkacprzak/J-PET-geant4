@@ -20,9 +20,8 @@ EventMessenger* EventMessenger::fInstance = nullptr;
 
 EventMessenger* EventMessenger::GetEventMessenger()
 {
-  if ( fInstance == nullptr ) {
+  if (fInstance == nullptr)
     fInstance = new EventMessenger();
-  }
   return fInstance;
 }
 
@@ -49,7 +48,6 @@ EventMessenger::EventMessenger()
 
   fCMDExcludedMulti = new G4UIcmdWithAnInteger("/jpetmc/event/excludedMulti", this);
   fCMDExcludedMulti->SetGuidance("Set excluded  multiplicity (works only with saveEvtsDetAcc); def: 1");
-
 
   fPrintStatBar = new G4UIcmdWithABool("/jpetmc/event/ShowProgress", this);
   fPrintStatBar->SetGuidance("Print how many events was generated (in %)");
@@ -88,51 +86,28 @@ EventMessenger::~EventMessenger()
 void EventMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
 
-  if (command == fPrintStat) {
+  if (command == fPrintStat)
     fPrintStatistics = fPrintStat->GetNewBoolValue(newValue);
-  }
-
-  if (command == fPrintStatPower) {
+  else if (command == fPrintStatPower)
     fPrintPower = fPrintStatPower->GetNewIntValue(newValue);
-  }
-
-  if (command == fCMDMinRegMulti) {
+  else if (command == fCMDMinRegMulti)
     fMinRegisteredMultiplicity = fCMDMinRegMulti->GetNewIntValue(newValue);
-  }
-
-  if (command == fCMDMaxRegMulti) {
+  else if (command == fCMDMaxRegMulti)
     fMaxRegisteredMultiplicity = fCMDMaxRegMulti->GetNewIntValue(newValue);
-  }
-
-  if (command == fPrintStatBar) {
+  else if (command == fPrintStatBar)
     fShowProgress = fPrintStatBar->GetNewBoolValue(newValue);
-  }
-
-  if (command == fAddDatetime) {
+  else if (command == fAddDatetime)
     fOutputWithDatetime = fAddDatetime->GetNewBoolValue(newValue);
-  }
-
-  if (command == fCMDKillEventsEscapingWorld) {
+  else if (command == fCMDKillEventsEscapingWorld)
     fKillEventsEscapingWorld = fCMDKillEventsEscapingWorld->GetNewBoolValue(newValue);
-  }
-
-  if (command == fCMDExcludedMulti){
+  else if (command == fCMDExcludedMulti)
     fExcludedMultiplicity = fCMDExcludedMulti->GetNewIntValue(newValue);
-  }
-
-  if (command == fSetSeed) {
+  else if (command == fSetSeed)
     fSeed = fSetSeed->GetNewIntValue(newValue);
-  }
-
-  if (command == fSaveSeed) {
+  else if (command == fSaveSeed)
     fSaveRandomSeed = fSaveSeed->GetNewBoolValue(newValue);
-  }
-
-  if (command == fAddDatetime) {
+  else if (command == fAddDatetime)
     fOutputWithDatetime = fAddDatetime->GetNewBoolValue(newValue);
-  }
-
-  if (command == fCMDAllowedMomentumTransfer) {
+  else if (command == fCMDAllowedMomentumTransfer)
     fAllowedMomentumTransfer = fCMDAllowedMomentumTransfer->GetNewDoubleValue(newValue);
-  }
 }

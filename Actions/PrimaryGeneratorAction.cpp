@@ -74,7 +74,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
   } else if (GetSourceTypeInfo() == ("nema")) {
     fPrimaryGenerator->GenerateNema(GetNemaPoint(), event);
   } else if (GetSourceTypeInfo() == "cosmics") {
-    fPrimaryGenerator->GenerateCosmicVertex(event, fHisto);
+    fPrimaryGenerator->GenerateCosmicVertex(event);
   } else {
     G4Exception("PrimaryGeneratorAction", "PG05", FatalException,
                 "Called run with non-exisitng geometry 2");

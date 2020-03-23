@@ -62,40 +62,32 @@ DetectorConstructionMessenger::~DetectorConstructionMessenger()
 
 void DetectorConstructionMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fLoadGeomForRun) {
+  if (command == fLoadGeomForRun) 
+  {
     fDetector->LoadGeometryForRun(fLoadGeomForRun->GetNewIntValue(newValue));
     fDetector->UpdateGeometry();
   }
-
-  if (command == fLoadIdealGeometry) {
-    G4Exception(
-      "DetectorConstructionMessenger", "DCM01", JustWarning, "Option is not yet implemented"
-    );
-  }
-
-  if (command == fLoadJPetBasicGeometry) {
+  else if (command == fLoadIdealGeometry) 
+    G4Exception( "DetectorConstructionMessenger", "DCM01", JustWarning, "Option is not yet implemented" );
+  else if (command == fLoadJPetBasicGeometry) 
+  {
     fDetector->LoadFrame(true);
     fDetector->UpdateGeometry();
   }
-
-  if (command == fLoadJPetExtendedGeometry) {
-    G4Exception("DetectorConstructionMessenger", "DCM01", JustWarning,
-                "Option is not yet implemented");
-  }
-
-  if (command == fLoadOnlyScintillators) {
+  else if (command == fLoadJPetExtendedGeometry) 
+    G4Exception("DetectorConstructionMessenger", "DCM01", JustWarning, "Option is not yet implemented");
+  else if (command == fLoadOnlyScintillators) 
+  {
     fDetector->LoadFrame(false);
     fDetector->UpdateGeometry();
   }
-// Introduce for the option of modular layer
-  if (command == fLoadModularLayer) {
-
-    fDetector->ConstructModularLayer( newValue );
+  else if (command == fLoadModularLayer) 
+  {
+    fDetector->ConstructModularLayer(newValue);
     fDetector->UpdateGeometry();
   }
-  //--------------------------------------
-
-  if (command == fScinHitMergingTime) {
+  else if (command == fScinHitMergingTime) 
+  {
     DetectorConstants::SetMergingTimeValueForScin(fScinHitMergingTime->GetNewDoubleValue(newValue));
     fDetector->UpdateGeometry();
   }

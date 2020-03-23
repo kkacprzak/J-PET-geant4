@@ -48,7 +48,6 @@ private:
   // Null pointer assigned to the modular layer - 
   G4UIcmdWithAString* fLoadModularLayer = nullptr;
   G4UIcmdWithADoubleAndUnit* fScinHitMergingTime = nullptr;
-
 };
 
 #endif
