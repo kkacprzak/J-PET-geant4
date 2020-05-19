@@ -70,7 +70,7 @@ public:
 
 private:
   G4String fGenerateSourceType;
-  G4String fAllowedSourceTypes[5] = {"run", "beam", "isotope", "nema", "cosmics"};
+  std::vector<G4String> fAllowedSourceTypes = {"run", "beam", "isotope", "nema", "cosmics"};
   PrimaryGeneratorActionMessenger* fMessenger = nullptr;
   PrimaryGenerator* fPrimaryGenerator = nullptr;
   HistoManager* fHisto = nullptr;

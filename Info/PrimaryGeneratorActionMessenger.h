@@ -56,7 +56,7 @@ private:
   G4UIcmdWithAnInteger* fNemaPosition = nullptr;
   G4UIcmdWith3VectorAndUnit* fSetChamberCenter = nullptr;
   G4UIcmdWithADoubleAndUnit* fSetChamberEffectivePositronRadius = nullptr;
-  G4UIcmdWithoutParameter* fCosmicOnly;
+  G4UIcmdWithoutParameter* fCosmicOnly = nullptr;
 
 };
 

@@ -54,9 +54,6 @@ public:
   static void SetChamberCenter(const G4ThreeVector);
   static const G4ThreeVector GetChamberCenter();
 
-  // Cosmics muons parameters
-  static const G4double muonChargeRatio;
-
 private:
   //! time in [ns]
   static G4double fScinHitMergingTime;

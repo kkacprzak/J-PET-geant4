@@ -23,7 +23,7 @@
 HistoManager::HistoManager() : fMakeControlHisto(true)
 {
   fEventPack = new JPetGeantEventPack();
-  fGeantInfo =  fEventPack->GetEventInformation();
+  fGeantInfo = fEventPack->GetEventInformation();
 }
 
 HistoManager::~HistoManager() {}
@@ -267,7 +267,7 @@ void HistoManager::AddGenInfoParticles(G4PrimaryParticle* particle)
   if (infoParticle == nullptr) { return; }
   G4int index = infoParticle->GetIndex();
   G4ThreeVector genMom = infoParticle->GenGenMomentum();
-  fGeantInfo->SetMomentumGamma( index, genMom.x() / keV, genMom.y() / keV, genMom.z() / keV);
+  fGeantInfo->SetMomentumGamma(index, genMom.x() / keV, genMom.y() / keV, genMom.z() / keV);
 }
 
 /**
@@ -280,7 +280,8 @@ void HistoManager::AddGenInfo(VtxInformation* info)
 {
   bool is3g = info->GetThreeGammaGen();
   bool is2g = info->GetTwoGammaGen();
-  bool isprompt = info->GetPromptGammaGen();
+  bool isPrompt = info->GetPromptGammaGen();
+  bool isCosmic = info->GetCosmicGammaGen();
 
   if (is2g || is3g) {
     fGeantInfo->SetThreeGammaGen(is3g);
@@ -302,8 +303,8 @@ void HistoManager::AddGenInfo(VtxInformation* info)
     }
   }
 
-  if (isprompt) {
-    fGeantInfo->SetPromptGammaGen(isprompt);
+  if (isPrompt) {
+    fGeantInfo->SetPromptGammaGen(isPrompt);
     fGeantInfo->SetPromptLifetime(info->GetLifetime() / ps);
     fGeantInfo->SetVtxPromptPosition(
       info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm
@@ -316,6 +317,10 @@ void HistoManager::AddGenInfo(VtxInformation* info)
       fHisto2D[5]->Fill(info->GetVtxPositionX() / cm, info->GetVtxPositionZ() / cm);
       fHisto2D[6]->Fill(info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     }
+  }
+
+  if(isCosmic){
+    fGeantInfo->setCosmicEventTag(true);
   }
 }
 

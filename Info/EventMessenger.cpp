@@ -50,7 +50,6 @@ EventMessenger::EventMessenger()
   fCMDExcludedMulti = new G4UIcmdWithAnInteger("/jpetmc/event/excludedMulti", this);
   fCMDExcludedMulti->SetGuidance("Set excluded  multiplicity (works only with saveEvtsDetAcc); def: 1");
 
-
   fPrintStatBar = new G4UIcmdWithABool("/jpetmc/event/ShowProgress", this);
   fPrintStatBar->SetGuidance("Print how many events was generated (in %)");
 

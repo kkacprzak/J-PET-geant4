@@ -57,6 +57,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
   }
 
   if (GetSourceTypeInfo() == ("run")) {
+
     if (nRun == 3) {
       fPrimaryGenerator->GenerateEvtLargeChamber(event);
     } else if (nRun == 5) {
@@ -64,9 +65,11 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
     } else if (nRun == 6 || nRun == 7) {
       fPrimaryGenerator->GenerateEvtLargeChamber(event);
     } else {
-      G4Exception("PrimaryGeneratorAction", "PG05", FatalException,
-                  "Called run with non-exisitng geometry 1");
+      G4Exception(
+        "PrimaryGeneratorAction", "PG05", FatalException, "Run nubmer is undefined."
+      );
     }
+
   } else if (GetSourceTypeInfo() == ("beam")) {
     fPrimaryGenerator->GenerateBeam(fBeam, event);
   } else if (GetSourceTypeInfo() == ("isotope")) {
@@ -76,8 +79,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
   } else if (GetSourceTypeInfo() == "cosmics") {
     fPrimaryGenerator->GenerateCosmicVertex(event, fHisto);
   } else {
-    G4Exception("PrimaryGeneratorAction", "PG05", FatalException,
-                "Called run with non-exisitng geometry 2");
+    G4Exception(
+      "PrimaryGeneratorAction", "PG05", FatalException, "Source type is undefined."
+    );
   }
 }
 

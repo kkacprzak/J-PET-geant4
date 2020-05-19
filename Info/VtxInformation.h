@@ -28,82 +28,23 @@ public:
   void Clear();
   virtual void Print() const;
 
-  void SetThreeGammaGen(G4bool tf)
-  {
-    fThreeGammaGen = tf;
-  };
-
-  void SetTwoGammaGen(G4bool tf)
-  {
-    fTwoGammaGen = tf;
-  };
-
-  void SetPromptGammaGen(G4bool tf)
-  {
-    fPromptGammaGen = tf;
-  };
-
-  void SetCosmicGen(G4bool isCosmic)
-  {
-    fCosmicGen = isCosmic;
-  };
-
-  void SetRunNr(G4int x)
-  {
-    fnRun = x;
-  };
-
+  void SetThreeGammaGen(G4bool tf) { fThreeGammaGen = tf; };
+  void SetTwoGammaGen(G4bool tf) { fTwoGammaGen = tf; };
+  void SetPromptGammaGen(G4bool tf) { fPromptGammaGen = tf; };
+  void SetCosmicGen(G4bool isCosmic) { fCosmicGen = isCosmic; };
+  void SetRunNr(G4int x) { fnRun = x; };
   void SetVtxPosition(G4double x, G4double y, G4double z);
-
-  void SetLifetime(G4double x)
-  {
-    fLifetime = x;
-  };
-
-  G4bool GetThreeGammaGen()
-  {
-    return fThreeGammaGen;
-  };
-
-  G4bool GetTwoGammaGen()
-  {
-    return fTwoGammaGen;
-  };
-
-  G4bool GetPromptGammaGen()
-  {
-    return fPromptGammaGen;
-  };
-
-  G4bool GetCosmicGammaGen()
-  {
-    return fCosmicGen;
-  };
-
-  G4int  GetRunNr()
-  {
-    return fnRun;
-  };
-
-  G4double GetVtxPositionX()
-  {
-    return fVtxPosition.x();
-  };
-
-  G4double GetVtxPositionY()
-  {
-    return fVtxPosition.y();
-  };
-
-  G4double GetVtxPositionZ()
-  {
-    return fVtxPosition.z();
-  };
-
-  G4double GetLifetime()
-  {
-    return fLifetime;
-  };
+  void SetVtxPosition(G4ThreeVector position);
+  void SetLifetime(G4double x) { fLifetime = x; };
+  G4bool GetThreeGammaGen() const { return fThreeGammaGen; };
+  G4bool GetTwoGammaGen() const { return fTwoGammaGen; };
+  G4bool GetPromptGammaGen() const { return fPromptGammaGen; };
+  G4bool GetCosmicGammaGen() const { return fCosmicGen; };
+  G4int  GetRunNr() const { return fnRun; };
+  G4double GetVtxPositionX() const { return fVtxPosition.x(); };
+  G4double GetVtxPositionY() const { return fVtxPosition.y(); };
+  G4double GetVtxPositionZ() const { return fVtxPosition.z(); };
+  G4double GetLifetime() const { return fLifetime; };
 
 private:
   G4ThreeVector fVtxPosition;

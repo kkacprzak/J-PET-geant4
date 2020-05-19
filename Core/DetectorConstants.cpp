@@ -26,7 +26,6 @@ const G4double DetectorConstants::wrappingThickness = 2 * 25.4 * pow(10, -6) * m
 const G4double DetectorConstants::wrappingShift = 1 * pow(10, -5) * m;
 G4double DetectorConstants::fScinHitMergingTime = 5.0 * ns;
 G4double DetectorConstants::fChamberCenter[3] = {0.0 * cm, 0.0 * cm, 0.0 * cm};
-const G4double DetectorConstants::muonChargeRatio = 1.2766;
 
 void DetectorConstants::SetChamberCenter(const G4ThreeVector xyz)
 {

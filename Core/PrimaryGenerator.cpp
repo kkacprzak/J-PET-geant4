@@ -15,6 +15,7 @@
 
 #include "../Info/PrimaryParticleInformation.h"
 #include "../Info/VtxInformation.h"
+#include "PrimaryGeneratorConstants.h"
 #include <G4HadPhaseSpaceGenbod.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4PhysicalConstants.hh>
@@ -34,7 +35,7 @@ PrimaryGenerator::PrimaryGenerator() : G4VPrimaryGenerator() {}
 PrimaryGenerator::~PrimaryGenerator() {}
 
 G4PrimaryVertex* PrimaryGenerator::GenerateThreeGammaVertex(
-  const G4ThreeVector vtxPosition, const G4double T0, const G4double lifetime3g
+  const G4ThreeVector& vtxPosition, const G4double T0, const G4double lifetime3g
 ) {
   G4PrimaryVertex* vertex = new G4PrimaryVertex();
   VtxInformation* info = new VtxInformation();
@@ -88,7 +89,7 @@ G4PrimaryVertex* PrimaryGenerator::GenerateThreeGammaVertex(
 }
 
 G4PrimaryVertex* PrimaryGenerator::GenerateTwoGammaVertex(
-  const G4ThreeVector vtxPosition, const G4double T0,  const G4double lifetime2g
+  const G4ThreeVector& vtxPosition, const G4double T0, const G4double lifetime2g
 ) {
   G4PrimaryVertex* vertex = new G4PrimaryVertex() ;
   VtxInformation* info = new VtxInformation();
@@ -141,9 +142,9 @@ G4PrimaryVertex* PrimaryGenerator::GenerateTwoGammaVertex(
   return vertex;
 }
 
-
 G4PrimaryVertex* PrimaryGenerator::GeneratePromptGammaVertex(
-  const G4ThreeVector vtxPosition, const G4double T0,  const G4double lifetimePrompt, const G4double energy
+  const G4ThreeVector& vtxPosition, const G4double T0,
+  const G4double lifetimePrompt, const G4double energy
 ) {
   G4PrimaryVertex* vertex = new G4PrimaryVertex();
   VtxInformation* info = new VtxInformation();
@@ -213,7 +214,7 @@ void PrimaryGenerator::GenerateEvtSmallChamber(
 }
 
 std::tuple<G4ThreeVector, MaterialExtension*> PrimaryGenerator::GetVerticesDistributionInFilledSphere(
-  const G4ThreeVector center, G4double radius
+  const G4ThreeVector& center, G4double radius
 ) {
   G4bool lookForVtx = false;
   G4ThreeVector myPoint(0 * cm, 0 * cm, 0 * cm);
@@ -232,7 +233,7 @@ std::tuple<G4ThreeVector, MaterialExtension*> PrimaryGenerator::GetVerticesDistr
 }
 
 std::tuple<G4ThreeVector, MaterialExtension*> PrimaryGenerator::GetVerticesDistributionAlongStepVector(
-  const G4ThreeVector center, const G4ThreeVector direction
+  const G4ThreeVector& center, const G4ThreeVector& direction
 ) {
   G4bool lookForVtx = false;
   G4ThreeVector myPoint;
@@ -299,9 +300,11 @@ void PrimaryGenerator::GenerateEvtLargeChamber(G4Event* event)
  */
 void PrimaryGenerator::GenerateCosmicVertex(G4Event* event, HistoManager* histos)
 {
+  using namespace primary_generator_constatns;
+
   // Generating particle
-  G4ParticleDefinition* muonDefinition;
-  G4double muonFrac = DetectorConstants::muonChargeRatio/(1+DetectorConstants::muonChargeRatio);
+  G4ParticleDefinition* muonDefinition = nullptr;
+  G4double muonFrac = MUON_CHARGE_RATIO/(1+MUON_CHARGE_RATIO);
   if(muonFrac < G4UniformRand()){
     muonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("mu+");
   } else {
@@ -309,36 +312,26 @@ void PrimaryGenerator::GenerateCosmicVertex(G4Event* event, HistoManager* histos
   }
 
   // Generating angles
-  TF1 *cos2Func = new TF1("cos2", "pow(cos(x),2)", -twopi/4, twopi/4);
-  G4double theta = cos2Func->GetRandom();
+  TF1 cos2Func("cos2", "pow(cos(x),2)", -twopi/4, twopi/4);
+  G4double theta = cos2Func.GetRandom();
   G4double phi = G4UniformRand()*twopi;
 
   // Cylinder of radius of third layer and half of sintillator dimension
-  G4ThreeVector posInDetector = VertexUniformInCylinder(
-    DetectorConstants::radius[2],
-    DetectorConstants::scinDim[2]/2
-  );
+  auto posInDetector = VertexUniformInCylinder(DetectorConstants::radius[2], DetectorConstants::scinDim[2]/2);
+  auto cosmicVertex = projectPointToWorldRoof(posInDetector, theta, phi);
 
-  // projecting point from the cilinder onto "roof" of the simulation world
-  G4double heightDiff = DetectorConstants::world_size[0]-posInDetector.x();
-  G4double yzDiff = heightDiff*tan(theta);
-  G4double vtx_y = posInDetector.y()-yzDiff*cos(phi);
-  G4double vtx_z = posInDetector.z()-yzDiff*sin(phi);
-
-  G4ThreeVector origin(DetectorConstants::world_size[0], vtx_y, vtx_z);
-
-  G4PrimaryVertex* vertex = new G4PrimaryVertex();
-  vertex->SetPosition(DetectorConstants::world_size[0], vtx_y, vtx_z);
-
-  histos->FillCosmicInfo(theta, posInDetector, origin);
+  histos->FillCosmicInfo(theta, posInDetector, cosmicVertex->GetPosition());
 
   VtxInformation* info = new VtxInformation();
   info->SetCosmicGen(true);
-  info->SetVtxPosition(DetectorConstants::world_size[0], vtx_y, vtx_z);
-  vertex->SetUserInformation(info);
+  info->SetVtxPosition(cosmicVertex->GetPosition());
+  cosmicVertex->SetUserInformation(info);
 
   G4PrimaryParticle* muon = new G4PrimaryParticle(
-    muonDefinition, -cos(theta)*4*GeV, sin(theta)*cos(phi)*4*GeV, sin(theta)*sin(phi)*4*GeV
+    muonDefinition,
+    -cos(theta)*MUON_MEAN_ENERGY_GEV,
+    sin(theta)*cos(phi)*MUON_MEAN_ENERGY_GEV,
+    sin(theta)*sin(phi)*MUON_MEAN_ENERGY_GEV
   );
 
   PrimaryParticleInformation* infoParticle = new PrimaryParticleInformation();
@@ -348,8 +341,8 @@ void PrimaryGenerator::GenerateCosmicVertex(G4Event* event, HistoManager* histos
   infoParticle->SetGenMomentum(-cos(theta), -sin(theta)*cos(phi), -sin(theta)*sin(phi));
   muon->SetUserInformation(infoParticle);
 
-  vertex->SetPrimary(muon);
-  event->AddPrimaryVertex(vertex);
+  cosmicVertex->SetPrimary(muon);
+  event->AddPrimaryVertex(cosmicVertex);
 }
 
 void PrimaryGenerator::GenerateBeam(BeamParams* beamParams, G4Event* event)
@@ -460,6 +453,22 @@ G4ThreeVector PrimaryGenerator::VertexUniformInCylinder(G4double rIn, G4double z
   return positionA;
 }
 
+/**
+ * Projecting point from the cylinder onto "roof" of the simulation world
+ */
+G4PrimaryVertex* PrimaryGenerator::projectPointToWorldRoof(
+  const G4ThreeVector& posInDetector, G4double theta, G4double phi
+) {
+  G4double heightDiff = DetectorConstants::world_size[0]-posInDetector.x();
+  G4double yzDiff = heightDiff*tan(theta);
+  G4double vtx_y = posInDetector.y()-yzDiff*cos(phi);
+  G4double vtx_z = posInDetector.z()-yzDiff*sin(phi);
+
+  G4PrimaryVertex* vertex = new G4PrimaryVertex();
+  vertex->SetPosition(DetectorConstants::world_size[0], vtx_y, vtx_z);
+  return vertex;
+}
+
 std::tuple<G4ThreeVector, G4double, G4double> PrimaryGenerator::GetVerticesDistribution(
   G4double maxXhalf, G4double maxYhalf, G4double maxZhalf
 ) {
@@ -487,7 +496,7 @@ std::tuple<G4ThreeVector, G4double, G4double> PrimaryGenerator::GetVerticesDistr
   return std::make_tuple(myPoint, ratio3g, lifetime3g);
 }
 
-const G4ThreeVector PrimaryGenerator::GetRandomPointInFilledSphere(G4double radius)
+G4ThreeVector PrimaryGenerator::GetRandomPointInFilledSphere(G4double radius) const
 {
   G4double theta = 2 * M_PI * G4UniformRand();
   G4double phi = acos(1 - 2 * G4UniformRand());
@@ -495,12 +504,10 @@ const G4ThreeVector PrimaryGenerator::GetRandomPointInFilledSphere(G4double radi
   G4double x = r * sin(phi) * cos(theta);
   G4double y = r * sin(phi) * sin(theta);
   G4double z = r * cos(phi);
-
   return G4ThreeVector(x, y, z);
-
 }
 
-const G4ThreeVector PrimaryGenerator::GetRandomPointOnSphere(G4double radius)
+G4ThreeVector PrimaryGenerator::GetRandomPointOnSphere(G4double radius) const
 {
   G4double theta = 2 * M_PI * G4UniformRand();
   G4double phi = acos(1 - 2 * G4UniformRand());

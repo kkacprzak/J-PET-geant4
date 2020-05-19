@@ -18,6 +18,8 @@
 
 void RunManager::DoEventLoop(G4int n_event, const char* macroFile, G4int n_select)
 {
+  std::cout<< "Event " << n_event << std::endl;
+
   InitializeEventLoop(n_event, macroFile, n_select);
 
   printf("\n\n");
@@ -39,7 +41,7 @@ void RunManager::DoEventLoop(G4int n_event, const char* macroFile, G4int n_selec
       bool isAborted = true;
       while (isAborted) {
         ProcessOneEvent(i_event);
-         isAborted = currentEvent->IsAborted(); 
+         isAborted = currentEvent->IsAborted();
         if (isAborted) {
           //! clean event - it will not be stored
           delete currentEvent;

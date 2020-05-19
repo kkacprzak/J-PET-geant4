@@ -91,7 +91,7 @@ public:
   }
 
 private:
-  bool fMakeControlHisto;
+  bool fMakeControlHisto = false;
 
   /**
    * 1D histograms array:

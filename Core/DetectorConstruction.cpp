@@ -74,21 +74,26 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   //! scintillators for standard setup; right now always loaded
   ConstructScintillators();
+  std::cout<< "Building 3 layers" << std::endl;
 
 
   if(fLoadModularLayer){
     ConstructScintillatorsModularLayer();
   }
 
-  if(fLoadCADFrame) {
-    ConstructFrameCAD();
-  }
+  // if(fLoadCADFrame) {
+  //   std::cout<< "Constructing Frame " << std::endl;
+  //
+  //   ConstructFrameCAD();
+  // }
 
   if(fRunNumber == 3) {
     ConstructTargetRun3();
   }
 
   if(fRunNumber == 5) {
+    std::cout<< "Constructing Run 5 " << std::endl;
+
     ConstructTargetRun5();
   }
 
@@ -99,6 +104,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   if (fRunNumber == 7) {
     ConstructTargetRun7();
   }
+
+  std::cout<< "Constructing finish " << std::endl;
 
   return fWorldPhysical;
 }
@@ -312,6 +319,8 @@ void DetectorConstruction::ConstructScintillators()
  */
 void DetectorConstruction::ConstructScintillatorsModularLayer()
 {
+  std::cout<< "Building Modular layer" << std::endl;
+
   G4Box* scinBoxInModule = new G4Box(
     "scinBoxInModule",
     DetectorConstants::scinDim_inModule[0] / 2.0,
@@ -368,14 +377,15 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
   //Single : for 24 modules layer
   //Double : for 8 and 16 layer configuration
 
-  switch ( fGeoKind )
+  switch (fGeoKind)
   {
-   case GeometryKind::Geo24ModulesLayer:
-     for(int i=0; i<13; i++) { radius_dynamic[i] = radius_24[i]; }
-     numberofModules = 24;
-     AngDisp_dynamic = AngDisp_24;
-     ConstructLayers( radius_dynamic, numberofModules, AngDisp_dynamic, icopyI);
-     break;
+    case GeometryKind::Geo24ModulesLayer:
+      std::cout<< "Modular single layer" << std::endl;
+      for(int i=0; i<13; i++) { radius_dynamic[i] = radius_24[i]; }
+      numberofModules = 24;
+      AngDisp_dynamic = AngDisp_24;
+      ConstructLayers(radius_dynamic, numberofModules, AngDisp_dynamic, 201);
+      break;
    case GeometryKind::Geo24ModulesLayerDistributed:
     for(int i=0; i<13; i++) { radius_dynamic[i] = radius_8[i]; }
     numberofModules = 8;
@@ -394,17 +404,17 @@ void DetectorConstruction::ConstructScintillatorsModularLayer()
 
 }
 
-void DetectorConstruction::ConstructLayers(std::vector<G4double>& radius_dynamic, G4int& numberofModules, G4double& AngDisp_dynamic, G4int& icopyI)
-{
+void DetectorConstruction::ConstructLayers(
+  std::vector<G4double>& radius_dynamic, G4int& numberofModules,
+  G4double& AngDisp_dynamic, G4int icopyI
+) {
  G4double phi = 0.0;
  G4double phi1 = 0.0;
 
- 	for(int i=0; i<numberofModules; i++)
- 	{
+ 	for(int i=0; i<numberofModules; i++) {
     phi = (i*2*M_PI/numberofModules);
 
-    for(int j=-6; j<7; j++)
-    {
+    for(int j=-6; j<7; j++) {
       phi1 = phi + j * AngDisp_dynamic;
 			G4double radius_new = radius_dynamic[j + 6] * cm;
 			G4RotationMatrix rot = G4RotationMatrix();
