@@ -293,7 +293,9 @@ void PrimaryGenerator::GenerateEvtLargeChamber(G4Event* event)
   //! Add prompt gamma from sodium
   G4ThreeVector promptVtxPosition = VertexUniformInCylinder(0.2 * cm, 0.2 * cm) + chamberCenter;
   event->AddPrimaryVertex(GeneratePromptGammaVertex(
-    promptVtxPosition, 0.0f, MaterialParameters::sodiumGammaTau, MaterialParameters::sodiumGammaEnergy
+    promptVtxPosition, 0.0f,
+    MaterialParameters::sodiumGammaTau,
+    MaterialParameters::sodiumGammaEnergy
   ));
 }
 
@@ -306,11 +308,11 @@ void PrimaryGenerator::GenerateEvtLargeChamber(G4Event* event)
  * in cosmic radiation at the sea level from https://arxiv.org/pdf/1005.5332.pdf
  * - trace back the flight track of the particle to a point onto a cosmic roof,
  * that is simulation worlds top dimension
- * - add particle and vertex to an event with energy of 4 GeV, which is an
+ * - add particle and vertex to an event with energy of 4 GeV, which is
  * mean for muons at sea level, according to PDG (30.3.1)
  * http://pdg.lbl.gov/2017/reviews/rpp2017-rev-cosmic-rays.pdf
  */
-void PrimaryGenerator::GenerateCosmicVertex(G4Event* event, HistoManager* histos)
+void PrimaryGenerator::GenerateCosmicVertex(G4Event* event)
 {
   using namespace primary_generator_constatns;
 

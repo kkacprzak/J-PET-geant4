@@ -88,8 +88,13 @@ public:
   }
 
 private:
+<<<<<<< HEAD
   bool fBookStatus = false;
   bool fMakeControlHisto = false;
+=======
+  bool fbookStatus = false;
+  bool fMakeControlHisto;
+>>>>>>> a99f6b0a00e9625ff61a1f07e34d1737590fbbb6
   TFile* fRootFile = nullptr;
   TTree* fTree = nullptr;
   TBranch* fBranchTrk = nullptr;

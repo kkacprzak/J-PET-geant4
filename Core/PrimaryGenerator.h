@@ -40,7 +40,7 @@ public:
   void GenerateNema(G4int, G4Event*);
   void GenerateEvtSmallChamber(G4Event* event, const G4double);
   void GenerateEvtLargeChamber(G4Event* event);
-  void GenerateCosmicVertex(G4Event* event, HistoManager* histos);
+  void GenerateCosmicVertex(G4Event* event);
   virtual void GeneratePrimaryVertex(G4Event*) {};
 
 private:

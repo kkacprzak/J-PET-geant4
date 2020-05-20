@@ -282,6 +282,7 @@ void HistoManager::FillHistoGenInfo(const G4Event* anEvent)
   fillHistogram("gen_g_ene", fGeantInfo->GetMomentumGamma(1).Mag());
 }
 
+<<<<<<< HEAD
 void HistoManager::FillCosmicInfo(G4double theta, G4ThreeVector init, G4ThreeVector orig)
 {
   fillHistogram("cosm_theta", theta);
@@ -290,6 +291,8 @@ void HistoManager::FillCosmicInfo(G4double theta, G4ThreeVector init, G4ThreeVec
   fillHistogram("coms_vtx_yz", init.z(), init.y());
 }
 
+=======
+>>>>>>> a99f6b0a00e9625ff61a1f07e34d1737590fbbb6
 void HistoManager::AddGenInfoParticles(G4PrimaryParticle* particle)
 {
   PrimaryParticleInformation* infoParticle = static_cast<PrimaryParticleInformation*> (particle->GetUserInformation());
@@ -339,8 +342,14 @@ void HistoManager::AddGenInfo(VtxInformation* info)
     }
   }
 
+<<<<<<< HEAD
   if (isPrompt) {
     fGeantInfo->SetPromptGammaGen(isPrompt);
+=======
+  if (isprompt)
+  {
+    fGeantInfo->SetPromptGammaGen(isprompt);
+>>>>>>> a99f6b0a00e9625ff61a1f07e34d1737590fbbb6
     fGeantInfo->SetPromptLifetime(info->GetLifetime() / ps);
     fGeantInfo->SetVtxPromptPosition(info->GetVtxPositionX() / cm, info->GetVtxPositionY() / cm, info->GetVtxPositionZ() / cm);
     fGeantInfo->SetRunNr(info->GetRunNr());
