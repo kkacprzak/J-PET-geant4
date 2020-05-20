@@ -40,7 +40,7 @@ public:
   G4bool GetTwoGammaGen() const { return fTwoGammaGen; };
   G4bool GetPromptGammaGen() const { return fPromptGammaGen; };
   G4bool GetCosmicGammaGen() const { return fCosmicGen; };
-  G4int  GetRunNr() const { return fnRun; };
+  G4int GetRunNr() const { return fnRun; };
   G4double GetVtxPositionX() const { return fVtxPosition.x(); };
   G4double GetVtxPositionY() const { return fVtxPosition.y(); };
   G4double GetVtxPositionZ() const { return fVtxPosition.z(); };

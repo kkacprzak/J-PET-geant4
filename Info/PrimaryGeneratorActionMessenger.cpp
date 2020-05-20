@@ -116,62 +116,55 @@ PrimaryGeneratorActionMessenger::~PrimaryGeneratorActionMessenger()
 
 void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fSourceType) {
+  if (command == fSourceType)
     fPrimGen->SetSourceTypeInfo(newValue);
-  }
-
-  if (command == fGammaBeamSetEnergy) {
+  if (command == fGammaBeamSetEnergy)
+  {
     ChangeToBeam();
     fPrimGen->GetBeamParams()->SetEnergy(fGammaBeamSetEnergy->GetNewDoubleValue(newValue));
   }
-
-  if (command == fGammaBeamSetPosition) {
+  else if (command == fGammaBeamSetPosition)
+  {
     ChangeToBeam();
     fPrimGen->GetBeamParams()->SetVtxPosition(fGammaBeamSetPosition->GetNew3VectorValue(newValue));
   }
-
-  if (command == fGammaBeamSetMomentum) {
+  else if (command == fGammaBeamSetMomentum)
+  {
     ChangeToBeam();
     fPrimGen->GetBeamParams()->SetMomentum(fGammaBeamSetMomentum->GetNew3VectorValue(newValue));
   }
-
-  if (command == fIsotopeSetShape) {
+  else if (command == fIsotopeSetShape)
     fPrimGen->GetIsotopeParams()->SetShape(newValue);
-  }
-
-  if (command == fIsotopeSetGenGammas) {
+  else if (command == fIsotopeSetGenGammas)
     fPrimGen->GetIsotopeParams()->SetGammasNumber(fIsotopeSetGenGammas->GetNewIntValue(newValue));
-  }
-
-  if (command == fIsotopeSetShapeDimCylinderRadius) {
+  else if (command == fIsotopeSetShapeDimCylinderRadius)
+  {
     ChangeToIsotope();
     fPrimGen->GetIsotopeParams()->SetShapeDim(0, fIsotopeSetShapeDimCylinderRadius->GetNewDoubleValue(newValue));
   }
-
-  if (command == fIsotopeSetShapeDimCylinderZ) {
+  else if (command == fIsotopeSetShapeDimCylinderZ)
+  {
     ChangeToIsotope();
     fPrimGen->GetIsotopeParams()->SetShapeDim(1, fIsotopeSetShapeDimCylinderRadius->GetNewDoubleValue(newValue));
   }
-
-  if (command == fIsotopeSetCenter) {
+  else if (command == fIsotopeSetCenter) 
+  {
     ChangeToIsotope();
     G4ThreeVector loc =  fIsotopeSetCenter->GetNew3VectorValue(newValue);
-    fPrimGen->GetIsotopeParams()->SetShapeCenterPosition(
-      loc.x(), loc.y(), loc.z()
-    );
+    fPrimGen->GetIsotopeParams()->SetShapeCenterPosition(loc.x(), loc.y(), loc.z());
   }
-
-  if (command == fNemaPosition) {
+  else if (command == fNemaPosition)
+  {
     fPrimGen->SetSourceTypeInfo("nema");
     fPrimGen->SetNemaPoint(fNemaPosition->GetNewIntValue(newValue));
   }
-
-  if (command == fSetChamberCenter) {
+  else if (command == fSetChamberCenter)
+  {
     if (!CheckIfRun()) ChangeToRun();
     DetectorConstants::SetChamberCenter(fSetChamberCenter->GetNew3VectorValue(newValue));
   }
-
-  if (command == fSetChamberEffectivePositronRadius) {
+  else if (command == fSetChamberEffectivePositronRadius)
+  {
     if (!CheckIfRun()) ChangeToRun();
     fPrimGen->SetEffectivePositronRadius(fSetChamberEffectivePositronRadius->GetNewDoubleValue(newValue));
   }
@@ -183,10 +176,9 @@ void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command, G4String
 
 void PrimaryGeneratorActionMessenger::ChangeToIsotope()
 {
-  if (fPrimGen->GetSourceTypeInfo() != "isotope") {
-    G4Exception(
-      "PrimaryGeneratorActionMessenger", "PGM02", JustWarning, "Changed sourceType to isotope"
-    );
+  if (fPrimGen->GetSourceTypeInfo() != "isotope") 
+  {
+    G4Exception("PrimaryGeneratorActionMessenger", "PGM02", JustWarning, "Changed sourceType to isotope");
     fPrimGen->SetSourceTypeInfo("isotope");
   }
 }
@@ -194,7 +186,8 @@ void PrimaryGeneratorActionMessenger::ChangeToIsotope()
 bool PrimaryGeneratorActionMessenger::CheckIfRun()
 {
   G4int nRun = DetectorConstruction::GetInstance()->GetRunNumber();
-  if (nRun != 0) {
+  if (nRun != 0) 
+  {
     fPrimGen->SetSourceTypeInfo("run");
     return true;
   }
@@ -203,10 +196,9 @@ bool PrimaryGeneratorActionMessenger::CheckIfRun()
 
 void PrimaryGeneratorActionMessenger::ChangeToRun()
 {
-  if (fPrimGen->GetSourceTypeInfo() != "run") {
-    G4Exception(
-      "PrimaryGeneratorActionMessenger", "PGM01", JustWarning, "Changed run number to RUN5"
-    );
+  if (fPrimGen->GetSourceTypeInfo() != "run") 
+  {
+    G4Exception("PrimaryGeneratorActionMessenger", "PGM01", JustWarning, "Changed run number to RUN5");
     DetectorConstruction::GetInstance()->LoadGeometryForRun(5);
     fPrimGen->SetSourceTypeInfo("run");
     DetectorConstruction::GetInstance()->UpdateGeometry();
@@ -216,10 +208,9 @@ void PrimaryGeneratorActionMessenger::ChangeToRun()
 void PrimaryGeneratorActionMessenger::ChangeToBeam()
 {
   //! check if we really changing parameters corresponding to the beam
-  if (fPrimGen->GetSourceTypeInfo() != "beam") {
-    G4Exception(
-      "PrimaryGeneratorActionMessenger", "PGM01", JustWarning, "Changed sourceType to beam"
-    );
+  if (fPrimGen->GetSourceTypeInfo() != "beam") 
+  {
+    G4Exception("PrimaryGeneratorActionMessenger", "PGM01", JustWarning, "Changed sourceType to beam");
     fPrimGen->SetSourceTypeInfo("beam");
   }
 }

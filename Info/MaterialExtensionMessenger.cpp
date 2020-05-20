@@ -21,9 +21,8 @@ MaterialExtensionMessenger*  MaterialExtensionMessenger::fInstance = nullptr;
 
 MaterialExtensionMessenger* MaterialExtensionMessenger::GetMaterialExtensionMessenger()
 {
-  if ( fInstance == nullptr ) {
+  if ( fInstance == nullptr ) 
     fInstance = new MaterialExtensionMessenger();
-  }
   return fInstance;
 }
 
@@ -32,86 +31,80 @@ MaterialExtensionMessenger::MaterialExtensionMessenger()
   fDirectory = new G4UIdirectory("/jpetmc/material/");
   fDirectory->SetGuidance("Commands for controling the geometry materials");
 
-  fDirectory = new G4UIdirectory("/jpetmc/material/xad/");
-  fDirectory->SetGuidance("Commands for controling the XAD material properties");
+  f3GammaOnly = new G4UIcmdWithoutParameter("/jpetmc/material/threeGammaOnly", this);
+  f3GammaOnly->SetGuidance("Only 3 gamma events will be generated (lifetime as for oPs)");
 
-  fXAD3GammaOnly = new G4UIcmdWithoutParameter("/jpetmc/material/xad/threeGammaOnly", this);
-  fXAD3GammaOnly->SetGuidance("Only 3 gamma events will be generated");
+  f2GammaOnly = new G4UIcmdWithoutParameter("/jpetmc/material/twoGammaOnly", this);
+  f2GammaOnly->SetGuidance("Only 2 gamma events will be generated (lifetime as for pPs)");
 
-  fXAD2GammaOnly = new G4UIcmdWithoutParameter("/jpetmc/material/xad/twoGammaOnly", this);
-  fXAD2GammaOnly->SetGuidance("Only 2 gamma events will be generated");
+  fPickOffOnly = new G4UIcmdWithoutParameter("/jpetmc/material/pickOffOnly", this);
+  fPickOffOnly->SetGuidance("Only 2 gamma events from pick-off/conversion will be generated (lifetime as for 3g)");
 
-  fXADPickOffOnly = new G4UIcmdWithoutParameter("/jpetmc/material/xad/pickOffOnly", this);
-  fXADPickOffOnly->SetGuidance("Only 2 gamma events from pick-off/conversion will be generated (lifetime as for 3g)");
-
-  fXADSet3gLifetime = new G4UIcmdWithADoubleAndUnit("/jpetmc/material/xad/oPslifetime", this);
-  fXADSet3gLifetime->SetGuidance("Set mean lifetime for 3g events");
-  fXADSet3gLifetime->SetDefaultValue(2.45);
-  fXADSet3gLifetime->SetDefaultUnit("ns");
-  fXADSet3gLifetime->SetUnitCandidates("ns");
-
-  fXADSet3gFraction = new G4UIcmdWithADouble("/jpetmc/material/xad/oPsFraction", this);
-  fXADSet3gFraction->SetGuidance("Set fraction of oPs events (0-1)");
-  fXADSet3gFraction->SetDefaultValue(0.1);
-
-  fXADSetPickOffFraction = new G4UIcmdWithADouble("/jpetmc/material/xad/pickOffFraction", this);
-  fXADSetPickOffFraction->SetGuidance("Set fraction of pickOff events (0-1)");
-  fXADSetPickOffFraction->SetDefaultValue(0.1);
+  fAddoPsComponent = new G4UIcmdWithAString("/jpetmc/material/oPsComponent", this);
+  fAddoPsComponent->SetGuidance("Adding oPs annihilation component with mean lifetime and intensity");
+  
+  fSetpPsComponent = new G4UIcmdWithAString("/jpetmc/material/pPsComponent", this);
+  fSetpPsComponent->SetGuidance("Setting pPs annihilation component to mean lifetime and intensity");
+  
+  fAddDirectComponent = new G4UIcmdWithAString("/jpetmc/material/directComponent", this);
+  fAddDirectComponent->SetGuidance("Adding direct positron annihilation component with mean lifetime and intensity");
+  
+  fReloadMaterials = new G4UIcmdWithAString("/jpetmc/material/reloadMaterials", this);
+  fReloadMaterials->SetGuidance("Reloading material for parameters given by user");
 }
 
 MaterialExtensionMessenger::~MaterialExtensionMessenger()
 {
-  delete fXAD3GammaOnly;
-  delete fXAD2GammaOnly;
-  delete fXADPickOffOnly;
-  delete fXADSet3gLifetime;
-  delete fXADSet3gFraction;
-  delete fXADSetPickOffFraction;
+  delete f3GammaOnly;
+  delete f2GammaOnly;
+  delete fPickOffOnly;
+  delete fAddoPsComponent;
+  delete fSetpPsComponent;
+  delete fAddDirectComponent;
 }
 
 void MaterialExtensionMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fXAD3GammaOnly) {
-    MaterialParameters::SetXADoPsOnly();
-    DetectorConstruction::GetInstance()->ReloadMaterials();
+  if (command == f3GammaOnly)
+    MaterialParameters::SetAnnihilationMode("oPs3G");
+  else if (command == f2GammaOnly)
+    MaterialParameters::SetAnnihilationMode("pPs2G");
+  else if (command == fPickOffOnly)
+    MaterialParameters::SetAnnihilationMode("oPs2G");
+  else if (command == fAddoPsComponent)
+  {
+    G4String paramString = newValue;
+    std::istringstream is(paramString);
+    G4double meanLifetime;
+    G4double probability;
+    is >> meanLifetime >> probability;
+    MaterialParameters::Temp.oPsLifetimes.push_back(meanLifetime);
+    MaterialParameters::Temp.oPsProbabilities.push_back(probability);
   }
-
-  if (command == fXAD2GammaOnly) {
-    MaterialParameters::SetXAD2gOnly();
-    DetectorConstruction::GetInstance()->ReloadMaterials();
+  else if (command == fSetpPsComponent) 
+  {
+    G4String paramString = newValue;
+    std::istringstream is(paramString);
+    G4double meanLifetime;
+    G4double fraction;
+    is >> meanLifetime >> fraction;
+    MaterialParameters::Temp.pPsLifetime = meanLifetime;
+    MaterialParameters::Temp.pPsFraction = fraction;
   }
-
-  if (command == fXADPickOffOnly) {
-    MaterialParameters::SetXADPickOffOnly();
-    DetectorConstruction::GetInstance()->ReloadMaterials();
+  else if (command == fAddDirectComponent) 
+  {
+    G4String paramString = newValue;
+    std::istringstream is(paramString);
+    G4double meanLifetime;
+    G4double probability;
+    is >> meanLifetime >> probability;
+    MaterialParameters::Temp.directLifetimes.push_back(meanLifetime);
+    MaterialParameters::Temp.directProbabilities.push_back(probability);
   }
-
-  if (command == fXADSet3gLifetime) {
-    MaterialParameters::SetXADoPsLifetime(fXADSet3gLifetime->GetNewDoubleValue(newValue));
-    DetectorConstruction::GetInstance()->ReloadMaterials();
-  }
-
-  if (command == fXADSet3gFraction) {
-    G4double frac =  fXADSet3gFraction->GetNewDoubleValue(newValue);
-    if ((frac > 1.0) || (frac < 0.0)) {
-      G4Exception(
-        "MaterialMessenger", "MP01", JustWarning, "Fraction should be between 0 and 1!"
-      );
-    } else {
-      MaterialParameters::SetXADoPsFraction(frac);
-      DetectorConstruction::GetInstance()->ReloadMaterials();
-    }
-  }
-
-  if (command == fXADSetPickOffFraction) {
-    G4double frac =  fXADSetPickOffFraction->GetNewDoubleValue(newValue);
-    if ((frac > 1.0) || (frac < 0.0)) {
-      G4Exception(
-        "MaterialMessenger", "MP01", JustWarning, "Fraction should be between 0 and 1!"
-      );
-    } else {
-      MaterialParameters::SetXADPickOffFraction(frac);
-      DetectorConstruction::GetInstance()->ReloadMaterials();
-    }
+  else if (command == fReloadMaterials)
+  {
+    G4String paramString = newValue;
+    DetectorConstruction::GetInstance()->ReloadMaterials(paramString);   
+    MaterialParameters::ClearTemp();
   }
 }

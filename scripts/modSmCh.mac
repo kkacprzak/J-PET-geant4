@@ -1,0 +1,8 @@
+# Macro setting barrel and modular detector (24 part ring)
+# Using small annihilation chamber
+
+/jpetmc/detector/loadModularLayer Single
+/jpetmc/detector/loadGeomForRun 5
+/run/initialize
+
+/run/beamOn 100000

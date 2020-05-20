@@ -1,0 +1,24 @@
+# Initialize kernel
+#
+#/control/execute init_vis.mac
+
+/jpetmc/detector/loadGeomForRun 5
+/run/initialize
+
+#Changing positronium oPs lifetime components parameters (lifetime[ns] probability[%])
+/jpetmc/material/oPsComponent 2 4
+/jpetmc/material/oPsComponent 10 2
+/jpetmc/material/oPsComponent 90 45
+#Changing positronium pPs lifetime components parameters (lifetime[ns] fraction[0-1])
+/jpetmc/material/pPsComponent 0.125 0.33
+#Changing positronium direct lifetime components parameters (lifetime[ns] probability[%])
+/jpetmc/material/directComponent 0.5 32
+#Setting new lifetime components for a given material (xad4, kapton, aluminium, pa6, plexiglass)
+/jpetmc/material/reloadMaterials xad4
+
+#Now lets change lifetime component in Kapton
+/jpetmc/material/directComponent 0.38 100
+/jpetmc/material/reloadMaterials kapton
+
+/run/beamOn 1000000
+#

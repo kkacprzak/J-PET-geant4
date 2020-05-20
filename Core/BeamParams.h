@@ -25,10 +25,8 @@ class BeamParams
 {
 public:
   BeamParams();
-  void SetEnergy(G4double x)
-  {
-    energy = x * keV;
-  };
+  /// \param x is the energy expressed in keV
+  void SetEnergy(G4double x) {energy = x * keV;};
   void SetVtxPosition(G4double x, G4double y, G4double z);
   void SetPolarization(G4double x, G4double y, G4double z);
   void SetMomentum(G4double x, G4double y, G4double z);
@@ -36,22 +34,10 @@ public:
   void SetPolarization(G4ThreeVector v);
   void SetMomentum(G4ThreeVector v);
 
-  G4ThreeVector GetVtx()
-  {
-    return vtxPosition;
-  };
-  G4double GetEne()
-  {
-    return energy;
-  };
-  G4ThreeVector GetMomentum()
-  {
-    return momentum;
-  };
-  G4ThreeVector GetPolarization()
-  {
-    return polarization;
-  };
+  G4ThreeVector GetVtx() const {return vtxPosition;};
+  G4double GetEnergy() const {return energy;};
+  G4ThreeVector GetMomentum() const {return momentum;};
+  G4ThreeVector GetPolarization() const {return polarization;};
 
 private:
   G4double energy;

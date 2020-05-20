@@ -22,10 +22,10 @@ Please choose among the following options:
 * [Installation](docs/install.md)
 * [Introduction](docs/intro.md)
 * [API overview and examples](docs/user_intro.md)
-* [Manual.pdf](docs/manual_v3.0.pdf)
+* [Manual.pdf](docs/manual_v3.1.pdf)
 * [Authors](docs/authors.md)
 
 ### Support \& bug reporting 
-If you have any question or comment please write to  Daria Kisielewska <dk.dariakisielewska.com> or
+If you have any question or comment please write to  Kamil Dulski <kamil.dulski@gmail.com> or
 post it on the [Redmine](http://sphinx.if.uj.edu.pl/redmine/) 
 

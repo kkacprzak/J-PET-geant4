@@ -27,17 +27,19 @@ Following options can be added to macro files, that are read by Geat4. Example f
 
 ## Additional parameters:
 * simulate only oPs gamma:  
- `/jpetmc/material/xad/threeGammaOnly`  
+ `/jpetmc/material/threeGammaOnly`  
 * simulate only 2 gamma:  
- `/jpetmc/material/xad/twoGammaOnly`  
+ `/jpetmc/material/twoGammaOnly`  
 * simulate only pick-off process (2g & long lifetime):
- `/jpetmc/material/xad/pickOffOnly`  
-* define longest lifetime component:  
- `/jpetmc/material/xad/oPslifetime`  
-* define fraction of oPs annihilations (0-1):  
- `/jpetmc/material/xad/oPsFraction`  
-* define fraction of pick-off processes (0-1):  
- `/jpetmc/material/xad/pickOffFraction`  
+ `/jpetmc/material/pickOffOnly`  
+* adding oPs component for material given further by reload material command
+ `/jpetmc/material/oPsComponent (mean lifetime in ns) (probability 0-100 %)`  
+* setting pPs component for material given further by reload material command
+ `/jpetmc/material/pPsComponent (mean lifetime in ns) (fraction of pPs to oPs)`  
+* adding oPs component for material given further by reload material command
+ `/jpetmc/material/directComponent (mean lifetime in ns) (probability 0-100 %)`  
+* reloading lifetime parameters for material given by command material (xad4, kapton, aluminium, plexiglass, pa6)
+ `/jpetmc/material/reloadMaterials (material)`  
 * set center of the annihilation chamber:  
  `/jpetmc/run/setChamberCenter`  
 * for run5: define range where we expect annihilation to occur:   
